@@ -44,8 +44,8 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 // node_modules/dotenv/lib/main.js
 var require_main = __commonJS({
   "node_modules/dotenv/lib/main.js"(exports, module) {
-    var fs13 = __require("fs");
-    var path13 = __require("path");
+    var fs15 = __require("fs");
+    var path15 = __require("path");
     var os4 = __require("os");
     var crypto2 = __require("crypto");
     var TIPS = [
@@ -176,7 +176,7 @@ var require_main = __commonJS({
       if (options && options.path && options.path.length > 0) {
         if (Array.isArray(options.path)) {
           for (const filepath of options.path) {
-            if (fs13.existsSync(filepath)) {
+            if (fs15.existsSync(filepath)) {
               possibleVaultPath = filepath.endsWith(".vault") ? filepath : `${filepath}.vault`;
             }
           }
@@ -184,15 +184,15 @@ var require_main = __commonJS({
           possibleVaultPath = options.path.endsWith(".vault") ? options.path : `${options.path}.vault`;
         }
       } else {
-        possibleVaultPath = path13.resolve(process.cwd(), ".env.vault");
+        possibleVaultPath = path15.resolve(process.cwd(), ".env.vault");
       }
-      if (fs13.existsSync(possibleVaultPath)) {
+      if (fs15.existsSync(possibleVaultPath)) {
         return possibleVaultPath;
       }
       return null;
     }
     function _resolveHome(envPath2) {
-      return envPath2[0] === "~" ? path13.join(os4.homedir(), envPath2.slice(1)) : envPath2;
+      return envPath2[0] === "~" ? path15.join(os4.homedir(), envPath2.slice(1)) : envPath2;
     }
     function _configVault(options) {
       const debug = parseBoolean(process.env.DOTENV_CONFIG_DEBUG || options && options.debug);
@@ -209,7 +209,7 @@ var require_main = __commonJS({
       return { parsed };
     }
     function configDotenv(options) {
-      const dotenvPath = path13.resolve(process.cwd(), ".env");
+      const dotenvPath = path15.resolve(process.cwd(), ".env");
       let encoding = "utf8";
       let processEnv = process.env;
       if (options && options.processEnv != null) {
@@ -237,13 +237,13 @@ var require_main = __commonJS({
       }
       let lastError;
       const parsedAll = {};
-      for (const path14 of optionPaths) {
+      for (const path16 of optionPaths) {
         try {
-          const parsed = DotenvModule.parse(fs13.readFileSync(path14, { encoding }));
+          const parsed = DotenvModule.parse(fs15.readFileSync(path16, { encoding }));
           DotenvModule.populate(parsedAll, parsed, options);
         } catch (e) {
           if (debug) {
-            _debug(`failed to load ${path14} ${e.message}`);
+            _debug(`failed to load ${path16} ${e.message}`);
           }
           lastError = e;
         }
@@ -256,7 +256,7 @@ var require_main = __commonJS({
         const shortPaths = [];
         for (const filePath of optionPaths) {
           try {
-            const relative = path13.relative(process.cwd(), filePath);
+            const relative = path15.relative(process.cwd(), filePath);
             shortPaths.push(relative);
           } catch (e) {
             if (debug) {
@@ -3556,8 +3556,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path13) {
-      let input = path13;
+    function removeDotSegments(path15) {
+      let input = path15;
       const output = [];
       let nextSlash = -1;
       let len = 0;
@@ -3809,8 +3809,8 @@ var require_schemes = __commonJS({
         wsComponent.secure = void 0;
       }
       if (wsComponent.resourceName) {
-        const [path13, query] = wsComponent.resourceName.split("?");
-        wsComponent.path = path13 && path13 !== "/" ? path13 : void 0;
+        const [path15, query] = wsComponent.resourceName.split("?");
+        wsComponent.path = path15 && path15 !== "/" ? path15 : void 0;
         wsComponent.query = query;
         wsComponent.resourceName = void 0;
       }
@@ -7229,12 +7229,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name}"`);
       return f;
     };
-    function addFormats(ajv, list, fs13, exportName) {
+    function addFormats(ajv, list, fs15, exportName) {
       var _a3;
       var _b;
       (_a3 = (_b = ajv.opts.code).formats) !== null && _a3 !== void 0 ? _a3 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs13[f]);
+        ajv.addFormat(f, fs15[f]);
     }
     module.exports = exports = formatsPlugin;
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -8000,7 +8000,7 @@ var require__ = __commonJS({
     var discriminator_1 = require_discriminator();
     var json_schema_2020_12_1 = require_json_schema_2020_12();
     var META_SCHEMA_ID = "https://json-schema.org/draft/2020-12/schema";
-    var Ajv20202 = class extends core_1.default {
+    var Ajv20203 = class extends core_1.default {
       constructor(opts = {}) {
         super({
           ...opts,
@@ -8027,11 +8027,11 @@ var require__ = __commonJS({
         return this.opts.defaultMeta = super.defaultMeta() || (this.getSchema(META_SCHEMA_ID) ? META_SCHEMA_ID : void 0);
       }
     };
-    exports.Ajv2020 = Ajv20202;
-    module.exports = exports = Ajv20202;
-    module.exports.Ajv2020 = Ajv20202;
+    exports.Ajv2020 = Ajv20203;
+    module.exports = exports = Ajv20203;
+    module.exports.Ajv2020 = Ajv20203;
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.default = Ajv20202;
+    exports.default = Ajv20203;
     var validate_1 = require_validate();
     Object.defineProperty(exports, "KeywordCxt", { enumerable: true, get: function() {
       return validate_1.KeywordCxt;
@@ -8835,10 +8835,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path13) {
-  if (!path13)
+function getElementAtPath(obj, path15) {
+  if (!path15)
     return obj;
-  return path13.reduce((acc, key) => acc?.[key], obj);
+  return path15.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -9247,11 +9247,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path13, issues) {
+function prefixIssues(path15, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path13);
+    iss.path.unshift(path15);
     return iss;
   });
 }
@@ -9398,16 +9398,16 @@ function flattenError(error51, mapper = (issue2) => issue2.message) {
 }
 function formatError(error51, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error52, path13 = []) => {
+  const processError = (error52, path15 = []) => {
     for (const issue2 of error52.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path13, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path15, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path13, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path13, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
       } else {
-        const fullpath = [...path13, ...issue2.path];
+        const fullpath = [...path15, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -9434,17 +9434,17 @@ function formatError(error51, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error51, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error52, path13 = []) => {
+  const processError = (error52, path15 = []) => {
     var _a3, _b;
     for (const issue2 of error52.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path13, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path15, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path13, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path13, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
       } else {
-        const fullpath = [...path13, ...issue2.path];
+        const fullpath = [...path15, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -9476,8 +9476,8 @@ function treeifyError(error51, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path13 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path13) {
+  const path15 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path15) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -22169,13 +22169,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path13 = ref.slice(1).split("/").filter(Boolean);
-  if (path13.length === 0) {
+  const path15 = ref.slice(1).split("/").filter(Boolean);
+  if (path15.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path13[0] === defsKey) {
-    const key = path13[1];
+  if (path15[0] === defsKey) {
+    const key = path15[1];
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -24928,8 +24928,8 @@ function getErrorMap2() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path13, errorMaps, issueData } = params;
-  const fullPath = [...path13, ...issueData.path || []];
+  const { data, path: path15, errorMaps, issueData } = params;
+  const fullPath = [...path15, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -25044,11 +25044,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path13, key) {
+  constructor(parent, value, path15, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path13;
+    this._path = path15;
     this._key = key;
   }
   get path() {
@@ -28575,11 +28575,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path13) {
-  if (path13.length === 0) {
+function getDotPath(path15) {
+  if (path15.length === 0) {
     return "object root";
   }
-  return path13.reduce((acc, seg, index) => {
+  return path15.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -37501,9 +37501,9 @@ function creditProblems(credits, mediaRefs) {
       problems.push(`credits: ${expected} has ${count} entries, expected one`);
   }
   const known = new Set(mediaRefs.map((ref) => `demo/${ref}`));
-  for (const path13 of covered.keys()) {
-    if (!known.has(path13))
-      problems.push(`credits: ${path13} does not match any file in content-media/`);
+  for (const path15 of covered.keys()) {
+    if (!known.has(path15))
+      problems.push(`credits: ${path15} does not match any file in content-media/`);
   }
   return problems;
 }
@@ -37715,6 +37715,1620 @@ async function loadRequest(source) {
   return request;
 }
 
+// src/providers/magento/index.ts
+import { promises as fs12 } from "node:fs";
+import path12 from "node:path";
+
+// src/providers/magento/types.ts
+var MAGENTO_MEDIA_LIMITS = {
+  maxLongEdge: 2e3,
+  maxFileBytes: 500 * 1024,
+  maxTotalBytes: 25 * 1024 * 1024,
+  namePattern: /^[a-z0-9][a-z0-9-]*\.(jpg|png|webp)$/
+};
+var MAX_PRODUCTS = 200;
+var DEFAULT_PRODUCTS_PER_LEAF = 6;
+var DEFAULT_CONFIGURABLE_RATIO = 0.35;
+var DEFAULT_PRICE_RANGE = { min: 10, max: 120 };
+
+// src/providers/magento/catalog.ts
+var COLOURS = [
+  { key: "black", label: "Black", swatch: "#000000" },
+  { key: "blue", label: "Blue", swatch: "#1857f7" },
+  { key: "brown", label: "Brown", swatch: "#945454" },
+  { key: "grey", label: "Grey", swatch: "#8f8f8f" },
+  { key: "green", label: "Green", swatch: "#53a828" },
+  { key: "white", label: "White", swatch: "#ffffff" },
+  { key: "orange", label: "Orange", swatch: "#eb6703" },
+  { key: "red", label: "Red", swatch: "#d8102a" }
+];
+var SIZE_SCALES = [
+  {
+    match: /\b(furniture|sofa|seating|interior|home decor|homeware|decor|lighting|lamp)\b/i,
+    options: [
+      { key: "two-seat", label: "Two-seat" },
+      { key: "three-seat", label: "Three-seat" },
+      { key: "compact", label: "Compact" },
+      { key: "wide", label: "Wide" }
+    ]
+  },
+  {
+    match: /\b(coffee|tea|food|grocer\w*|spice|snack|bakery|roaster\w*)\b/i,
+    options: [
+      { key: "250g", label: "250 g" },
+      { key: "500g", label: "500 g" },
+      { key: "1kg", label: "1 kg" }
+    ]
+  },
+  {
+    match: /\b(jewel\w*|ring|watch|accessor\w*)\b/i,
+    options: [
+      { key: "16cm", label: "16 cm" },
+      { key: "18cm", label: "18 cm" },
+      { key: "20cm", label: "20 cm" }
+    ]
+  }
+];
+var APPAREL_SIZES = [
+  { key: "xs", label: "XS" },
+  { key: "s", label: "S" },
+  { key: "m", label: "M" },
+  { key: "l", label: "L" },
+  { key: "xl", label: "XL" }
+];
+function sizesFor(topic) {
+  return SIZE_SCALES.find((scale) => scale.match.test(topic))?.options ?? APPAREL_SIZES;
+}
+function weightRangeFor(topic) {
+  if (/\b(furniture|sofa|seating|table|interior|home decor|homeware)\b/i.test(topic))
+    return [8, 45];
+  if (/\b(lighting|lamp|decor)\b/i.test(topic)) return [1, 8];
+  if (/\b(jewel\w*|ring|watch|accessor\w*)\b/i.test(topic)) return [0.05, 0.5];
+  return [0.2, 3];
+}
+var MATERIALS = [
+  "Oak",
+  "Walnut",
+  "Linen",
+  "Cotton",
+  "Leather",
+  "Steel",
+  "Glass",
+  "Wool"
+];
+function planCatalog(request) {
+  const warnings = [];
+  const random = seededRandom(hashString(`${request.theme}|${request.store.topic}`));
+  const { categories, leaves } = planCategories(request);
+  const attributes = planAttributes(request);
+  const attributeSets = planAttributeSets(request, attributes);
+  const products = planProducts(request, leaves, attributes, random, warnings);
+  return { attributes, attributeSets, categories, products, warnings };
+}
+function planCategories(request) {
+  const categories = [];
+  const leaves = [];
+  for (const department of request.catalog.departments) {
+    const children = department.children ?? [];
+    const node = {
+      key: department.key,
+      name: department.name,
+      // A department with children is a landing page as well as a grid — that
+      // is what PRODUCTS_AND_PAGE means, and what Luma sets on Gear.
+      display_mode: children.length > 0 ? "PRODUCTS_AND_PAGE" : "PRODUCTS",
+      ...department.description ? { description: department.description } : {}
+    };
+    if (children.length > 0) {
+      node.children = children.map((child) => ({
+        key: child.key,
+        name: child.name,
+        display_mode: "PRODUCTS",
+        ...child.description ? { description: child.description } : {}
+      }));
+      for (const child of children) {
+        leaves.push({ key: child.key, name: child.name, departmentKey: department.key });
+      }
+    } else {
+      leaves.push({
+        key: department.key,
+        name: department.name,
+        departmentKey: department.key
+      });
+    }
+    categories.push(node);
+  }
+  return { categories, leaves };
+}
+function planAttributes(request) {
+  const ratio = request.catalog.configurable_ratio ?? DEFAULT_CONFIGURABLE_RATIO;
+  const attributes = [];
+  if (ratio > 0) {
+    const axes = request.catalog.axes ?? [
+      { code: "color", label: "Colour", swatch: "visual" },
+      { code: "size", label: "Size", swatch: "text" }
+    ];
+    const sizes = sizesFor(request.store.topic);
+    for (const axis of axes) {
+      const visual = axis.swatch === "visual";
+      const options = (axis.code === "size" ? sizes : COLOURS).map((option) => ({
+        key: option.key,
+        label: option.label,
+        ...visual && option.swatch ? { swatch: option.swatch } : {}
+      }));
+      attributes.push({
+        code: axis.code,
+        label: axis.label,
+        input: "select",
+        // Both are required by Magento for a configurable axis; see the file
+        // docblock. Not a default a caller may override.
+        global: true,
+        ...axis.swatch ? { swatch: axis.swatch } : {},
+        options
+      });
+    }
+  }
+  attributes.push({
+    code: "material",
+    label: "Material",
+    input: "multiselect",
+    global: false,
+    options: MATERIALS.map((name) => ({ key: slugify2(name), label: name }))
+  });
+  return attributes;
+}
+function planAttributeSets(request, attributes) {
+  const codes = attributes.map((attribute) => attribute.code);
+  return request.catalog.departments.map((department) => ({
+    key: department.key,
+    name: department.name,
+    attributes: codes
+  }));
+}
+function planProducts(request, leaves, attributes, random, warnings) {
+  const perLeaf = request.catalog.products_per_leaf ?? DEFAULT_PRODUCTS_PER_LEAF;
+  const ratio = request.catalog.configurable_ratio ?? DEFAULT_CONFIGURABLE_RATIO;
+  const range = request.store.price_range ?? DEFAULT_PRICE_RANGE;
+  const seeds = request.catalog.seeds ?? [];
+  const axisCodes = attributes.filter((a) => a.global && a.input === "select").map((a) => a.code);
+  const material = attributes.find((a) => a.code === "material");
+  const weight = weightRangeFor(request.store.topic);
+  const skuPrefix = skuStem(request.store.name);
+  const usedKeys = /* @__PURE__ */ new Set();
+  const usedSkus = /* @__PURE__ */ new Set();
+  const products = [];
+  for (const seed of seeds) {
+    const leaf = leaves.find((candidate) => candidate.key === seed.category) ?? leaves[0];
+    if (!leaf) break;
+    products.push(
+      buildProduct2({
+        key: seed.key,
+        name: seed.name,
+        leaf,
+        type: seed.type ?? "simple",
+        price: seed.price ?? money2(pickPrice(random, range)),
+        sku: seed.sku ?? uniqueSku(skuPrefix, seed.name, usedSkus),
+        axisCodes,
+        attributes,
+        material,
+        random,
+        weight,
+        ...seed.description ? { description: seed.description } : {},
+        ...seed.short_description ? { shortDescription: seed.short_description } : {}
+      })
+    );
+    usedKeys.add(seed.key);
+  }
+  for (const leaf of leaves) {
+    const already = products.filter(
+      (product) => product.categories?.includes(leaf.key)
+    ).length;
+    for (let index = already; index < perLeaf; index++) {
+      const name = productName(leaf, index, random);
+      const key = uniqueKey2(slugify2(name), usedKeys);
+      const configurable = axisCodes.length > 0 && random() < ratio;
+      products.push(
+        buildProduct2({
+          key,
+          name,
+          leaf,
+          type: configurable ? "configurable" : "simple",
+          price: money2(pickPrice(random, range)),
+          sku: uniqueSku(skuPrefix, name, usedSkus),
+          axisCodes,
+          attributes,
+          material,
+          random,
+          weight
+        })
+      );
+    }
+  }
+  if (products.length === 0) {
+    warnings.push(
+      "No products were generated; check that the request names at least one department"
+    );
+  }
+  return products;
+}
+function buildProduct2(args) {
+  const product = {
+    key: args.key,
+    sku: args.sku,
+    type: args.type,
+    attribute_set: args.leaf.departmentKey,
+    name: args.name,
+    url_key: slugify2(args.name),
+    price: args.price,
+    categories: [args.leaf.key],
+    ...args.description ? { description: args.description } : {},
+    ...args.shortDescription ? { short_description: args.shortDescription } : {}
+  };
+  if (args.material?.options?.length) {
+    const chosen = pickSome(args.random, args.material.options, 1, 2).map(
+      (option) => option.key
+    );
+    product.attributes = { material: chosen };
+  }
+  if (args.type === "configurable" && args.axisCodes.length > 0) {
+    product.axes = args.axisCodes;
+    product.variants = buildVariants(args);
+  } else {
+    product.weight = weigh(args.random, args.weight);
+  }
+  return product;
+}
+function buildVariants(args) {
+  const byCode = new Map(args.attributes.map((attribute) => [attribute.code, attribute]));
+  const chosen = args.axisCodes.map((code) => {
+    const options = byCode.get(code)?.options ?? [];
+    const take = code === "size" ? Math.min(options.length, 3 + Math.floor(args.random() * 3)) : 3;
+    return { code, options: pickSome(args.random, options, take, take) };
+  });
+  const combinations = [{}];
+  for (const axis of chosen) {
+    const next = [];
+    for (const partial2 of combinations) {
+      for (const option of axis.options)
+        next.push({ ...partial2, [axis.code]: option.key });
+    }
+    combinations.length = 0;
+    combinations.push(...next);
+  }
+  const weight = weigh(args.random, args.weight);
+  return combinations.map((values) => ({
+    sku: `${args.sku}-${Object.values(values).map((v) => v.toUpperCase()).join("-")}`.slice(0, 40),
+    price: args.price,
+    weight,
+    values
+  }));
+}
+var NAME_STEMS = [
+  "Halden",
+  "Orla",
+  "Marlow",
+  "Brecon",
+  "Alvar",
+  "Nessa",
+  "Rowan",
+  "Teign",
+  "Calder",
+  "Ingrid",
+  "Sorrel",
+  "Fenwick",
+  "Lundy",
+  "Mirren",
+  "Dalby",
+  "Ashcombe"
+];
+function productName(leaf, index, random) {
+  const stem = NAME_STEMS[(index + Math.floor(random() * NAME_STEMS.length)) % NAME_STEMS.length];
+  const noun = singular(leaf.name);
+  return `${stem} ${noun}`;
+}
+function singular(name) {
+  if (/ies$/i.test(name)) return name.replace(/ies$/i, "y");
+  if (/sses$/i.test(name)) return name.replace(/es$/i, "");
+  if (/s$/i.test(name) && !/ss$/i.test(name)) return name.replace(/s$/i, "");
+  return name;
+}
+function skuStem(storeName) {
+  const letters = storeName.replace(/[^a-zA-Z]/g, "").toUpperCase();
+  return (letters.slice(0, 2) || "TS").padEnd(2, "X");
+}
+function uniqueSku(prefix, name, used) {
+  const base = `${prefix}-${slugify2(name).replace(/-/g, "").toUpperCase().slice(0, 12)}`;
+  let sku = base.slice(0, 34);
+  let n = 2;
+  while (used.has(sku)) sku = `${base.slice(0, 32)}-${n++}`;
+  used.add(sku);
+  return sku;
+}
+function uniqueKey2(base, used) {
+  let key = base;
+  let n = 2;
+  while (used.has(key)) key = `${base}-${n++}`;
+  used.add(key);
+  return key;
+}
+function pickPrice(random, range) {
+  const raw = range.min + random() * (range.max - range.min);
+  const step = raw >= 1e3 ? 50 : raw >= 200 ? 10 : raw >= 50 ? 5 : 1;
+  return Math.max(step, Math.round(raw / step) * step);
+}
+function money2(value) {
+  return value.toFixed(2);
+}
+function weigh(random, [lo, hi]) {
+  const value = lo + random() * (hi - lo);
+  return value < 1 ? value.toFixed(2) : value.toFixed(1);
+}
+function pickSome(random, list, min, max) {
+  const count = Math.max(
+    1,
+    Math.min(list.length, min + Math.floor(random() * (max - min + 1)))
+  );
+  return [...list].map((item) => [random(), item]).sort((a, b) => a[0] - b[0]).slice(0, count).map(([, item]) => item);
+}
+
+// src/providers/magento/directives.ts
+var resolveNoMedia = () => void 0;
+function blocksToMagentoHtml(blocks, resolve = resolveNoMedia) {
+  const rendered = [];
+  for (const block of blocks) {
+    const html = blockToHtml2(block, resolve);
+    if (html) rendered.push(html);
+  }
+  return rendered.join("\n");
+}
+function blockToHtml2(block, resolve) {
+  switch (block.type) {
+    case "paragraph":
+      return block.text.trim() ? `<p>${escapeHtml3(block.text)}</p>` : "";
+    case "heading":
+      return `<h${block.level}>${escapeHtml3(block.text)}</h${block.level}>`;
+    case "image": {
+      const path15 = resolve(block.image);
+      if (!path15) return "";
+      const alt = block.alt ?? block.image.alt ?? "";
+      const img = `<img src="${escapeAttr2(path15)}" alt="${escapeAttr2(alt)}" />`;
+      return block.caption ? `<figure>${img}<figcaption>${escapeHtml3(block.caption)}</figcaption></figure>` : img;
+    }
+    case "gallery": {
+      const items = block.images.map((ref) => resolve(ref)).filter((path15) => !!path15).map((path15) => `<li class="item"><img src="${escapeAttr2(path15)}" alt="" /></li>`);
+      if (items.length === 0) return "";
+      return `<ul class="gallery items">${items.join("")}</ul>`;
+    }
+    case "quote":
+      return block.attribution ? `<blockquote><p>${escapeHtml3(block.text)}</p><cite>${escapeHtml3(block.attribution)}</cite></blockquote>` : `<blockquote><p>${escapeHtml3(block.text)}</p></blockquote>`;
+    case "list": {
+      const tag = block.ordered ? "ol" : "ul";
+      const items = block.items.map((item) => `<li>${escapeHtml3(item)}</li>`).join("");
+      return `<${tag}>${items}</${tag}>`;
+    }
+    case "code":
+      return `<pre><code>${escapeHtml3(block.code)}</code></pre>`;
+    case "divider":
+      return "<hr />";
+    case "video":
+      return "";
+    default: {
+      const never2 = block;
+      void never2;
+      return "";
+    }
+  }
+}
+function storeUrl(route) {
+  return `{{store url="${route.replace(/^\/+/, "")}"}}`;
+}
+function escapeHtml3(text2) {
+  return text2.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function escapeAttr2(text2) {
+  return escapeHtml3(text2).replace(/"/g, "&quot;");
+}
+
+// src/providers/magento/generate.ts
+async function generateMagentoContent(options) {
+  const { request, media, imageSource } = options;
+  const engine = options.engine ?? new TemplateContentEngine();
+  const topic = request.store.topic;
+  const warnings = [];
+  if (request.store.language && !/^en(\b|[-_])/i.test(request.store.language)) {
+    warnings.push(
+      `store.language "${request.store.language}" is not supported by the built-in prose engine; the demo text is English`
+    );
+  }
+  const plan = planCatalog(request);
+  warnings.push(...plan.warnings);
+  const total = plan.products.length + (request.pages?.length ?? 0) + (request.blocks?.length ?? 0);
+  let done = 0;
+  const step = (label) => options.onProgress?.(++done, total, label);
+  for (const category of flatten(plan.categories)) {
+    if (!imageSource) break;
+    const path15 = await addImage(
+      media,
+      imageSource,
+      `${category.name} ${topic}`,
+      `cat-${category.key}`,
+      "feature"
+    );
+    if (path15) category.image = path15;
+  }
+  for (const product of plan.products) {
+    await describeProduct(product, { topic, engine, media, imageSource });
+    step(product.name);
+  }
+  const pages = await buildPages(request, engine, warnings);
+  for (const page of pages) step(page.title);
+  const blocks = buildBlocks(request, plan.categories);
+  for (const block of blocks) step(block.title);
+  const content = {
+    format: "magento-content/1",
+    generator: options.generator,
+    theme: request.theme,
+    ...plan.attributes.length ? { attributes: plan.attributes } : {},
+    ...plan.attributeSets.length ? { attribute_sets: plan.attributeSets } : {},
+    categories: plan.categories,
+    products: plan.products,
+    ...pages.length ? { pages } : {},
+    ...blocks.length ? { blocks } : {}
+  };
+  return {
+    content,
+    counts: {
+      attributes: plan.attributes.length,
+      attribute_sets: plan.attributeSets.length,
+      categories: flatten(plan.categories).length,
+      products: plan.products.length,
+      variants: plan.products.reduce((n, p) => n + (p.variants?.length ?? 0), 0),
+      pages: pages.length,
+      blocks: blocks.length
+    },
+    warnings
+  };
+}
+async function describeProduct(product, ctx) {
+  const seed = hashString(`${product.key}|${ctx.topic}`);
+  if (!product.description) {
+    const blocks = await ctx.engine.generateBody({
+      title: product.name,
+      topic: ctx.topic,
+      // A product description is a paragraph or three, not an article. Luma's
+      // own run to roughly 60 words plus a short feature list.
+      targetWords: 120,
+      seed
+    });
+    product.description = blocksToMagentoHtml(blocks.filter((b) => b.type !== "image"));
+  }
+  if (!product.short_description) {
+    product.short_description = await ctx.engine.generateExcerpt(
+      product.name,
+      ctx.topic,
+      seed
+    );
+  }
+  if (ctx.imageSource) {
+    const path15 = await addImage(
+      ctx.media,
+      ctx.imageSource,
+      `${product.name} ${ctx.topic}`,
+      product.key,
+      "feature"
+    );
+    if (path15) product.image = path15;
+    if (product.type === "configurable") {
+      const alt = await addImage(
+        ctx.media,
+        ctx.imageSource,
+        `${product.name} ${ctx.topic} detail`,
+        `${product.key}-2`,
+        "gallery"
+      );
+      if (alt) product.gallery = [alt];
+    }
+  }
+}
+async function buildPages(request, engine, warnings) {
+  const pages = [];
+  for (const requested of request.pages ?? []) {
+    const seed = hashString(`${request.theme}|page|${requested.key}`);
+    const blocks = await engine.generateBody({
+      title: requested.title,
+      topic: request.store.topic,
+      targetWords: 320,
+      seed
+    });
+    const body = blocksToMagentoHtml(blocks.filter((b) => b.type !== "image"));
+    pages.push({
+      key: requested.key,
+      title: requested.title,
+      content_heading: requested.title,
+      page_layout: requested.page_layout ?? "1column",
+      // The wrapper class is Luma's own, so a theme styling `.cms-content`
+      // dresses a generated page the same way it dresses the stock one.
+      content: `<div class="cms-content">
+${body}
+</div>`
+    });
+  }
+  if ((request.pages?.length ?? 0) === 0) {
+    warnings.push(
+      "The request named no CMS pages, so footer links will have nothing to open"
+    );
+  }
+  return pages;
+}
+function buildBlocks(request, categories) {
+  const blocks = [];
+  for (const requested of request.blocks ?? []) {
+    const content = /footer|links/i.test(requested.key) ? footerLinks(request) : /menu|nav|categor/i.test(requested.key) ? categoryMenu(requested.title, categories) : `<div class="block-content"><p>${escapeHtml3(request.store.name)}</p></div>`;
+    blocks.push({ key: requested.key, title: requested.title, content });
+  }
+  return blocks;
+}
+function footerLinks(request) {
+  const items = (request.pages ?? []).map(
+    (page) => `    <li class="nav item"><a href="${storeUrl(page.key)}">${escapeHtml3(page.title)}</a></li>`
+  ).join("\n");
+  return `<ul class="footer links">
+${items}
+</ul>
+`;
+}
+function categoryMenu(title, categories) {
+  const items = categories.map(
+    (category) => `    <li class="item"><a href="${storeUrl(category.url_key ?? category.key)}">${escapeHtml3(category.name)}</a></li>`
+  ).join("\n");
+  return `<div class="categories-menu"><strong class="title"><span>${escapeHtml3(title)}</span></strong>
+<ul class="items">
+${items}
+</ul>
+</div>
+`;
+}
+async function addImage(media, source, query, baseName, role) {
+  const refs = await source.fetch(
+    {
+      query,
+      role,
+      // Magento's catalog grid is square by convention (`etc/view.xml` ships
+      // 1:1 for the product grid), and a landscape photo in a square tile is
+      // cropped by the theme rather than by us.
+      orientation: "square",
+      aspectRatio: 1,
+      minWidth: 800
+    },
+    1
+  );
+  const ref = refs[0];
+  if (!ref) return void 0;
+  return media.add(ref, baseName);
+}
+function flatten(categories) {
+  const out = [];
+  const walk = (list) => {
+    for (const category of list) {
+      out.push(category);
+      if (category.children) walk(category.children);
+    }
+  };
+  walk(categories);
+  return out;
+}
+
+// src/providers/magento/media.ts
+async function chooseMagentoImageSource(requested, options = {}) {
+  const warnings = [];
+  const env = options.env ?? process.env;
+  if (requested === "none") return { source: null, warnings };
+  let source;
+  if (options.override) {
+    source = options.override;
+  } else if (requested === "auto") {
+    source = await resolveAuto2(options.sourceOptions ?? {}, env, warnings);
+  } else {
+    source = createImageSource(requested, options.sourceOptions ?? {});
+  }
+  if (source.kind === "none") return { source: null, warnings };
+  if (!await source.isAvailable()) {
+    throw new ThemeseedError(`Image source "${source.kind}" is not usable`, {
+      code: "IMAGE_SOURCE_UNAVAILABLE",
+      hint: await source.unavailableReason()
+    });
+  }
+  return { source, warnings };
+}
+async function resolveAuto2(options, env, warnings) {
+  if (hasAiKey(env)) return createImageSource("ai", options);
+  const localDir = options.local?.directory ?? env.THEMESEED_LOCAL_IMAGE_DIR;
+  if (localDir) {
+    const local = createImageSource("local", options);
+    if (await local.isAvailable()) return local;
+    warnings.push(
+      `images.source "auto": local folder skipped \u2014 ${await local.unavailableReason()}`
+    );
+  }
+  if (hasStockKey(env)) return createImageSource("stock", options);
+  warnings.push(
+    `images.source "auto" found no usable source, so the demo has no images and every product will show Magento's grey placeholder. Set an AI key (OPENAI_API_KEY, XAI_API_KEY, GOOGLE_API_KEY, FAL_KEY), a stock key (UNSPLASH_ACCESS_KEY, PEXELS_API_KEY), or point THEMESEED_LOCAL_IMAGE_DIR at your own images.`
+  );
+  return createImageSource("none");
+}
+
+// src/providers/magento/schema.ts
+var import__2 = __toESM(require__(), 1);
+
+// src/providers/magento/schema/magento-content-1.schema.json
+var magento_content_1_schema_default = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  $id: "https://themeanax.com/schema/magento-content-1.schema.json",
+  title: "Magento demo content package (magento-content/1)",
+  description: "Written by `themeseed magento-demo` as demo/catalog.json, read by the magento-theme content module's data patch. Spec: docs/superpowers/specs/2026-10-21-magento-demo-content-contract.md \xA75. Key order is the order the importer applies them in: attributes, attribute sets, categories, products, CMS.",
+  type: "object",
+  additionalProperties: false,
+  required: ["format", "generator", "theme", "categories", "products"],
+  properties: {
+    format: { const: "magento-content/1" },
+    generator: { type: "string", minLength: 1 },
+    theme: {
+      type: "string",
+      pattern: "^[a-z0-9][a-z0-9-]{0,99}$"
+    },
+    attributes: {
+      type: "array",
+      maxItems: 40,
+      items: { $ref: "#/$defs/attribute" }
+    },
+    attribute_sets: {
+      type: "array",
+      maxItems: 20,
+      items: { $ref: "#/$defs/attributeSet" }
+    },
+    categories: {
+      type: "array",
+      minItems: 1,
+      items: { $ref: "#/$defs/category" }
+    },
+    products: {
+      type: "array",
+      minItems: 1,
+      maxItems: 200,
+      items: { $ref: "#/$defs/product" }
+    },
+    pages: {
+      type: "array",
+      maxItems: 30,
+      items: { $ref: "#/$defs/cmsPage" }
+    },
+    blocks: {
+      type: "array",
+      maxItems: 40,
+      items: { $ref: "#/$defs/cmsBlock" }
+    }
+  },
+  $defs: {
+    key: {
+      type: "string",
+      pattern: "^[a-z0-9][a-z0-9-]{0,99}$"
+    },
+    identifier: {
+      type: "string",
+      pattern: "^[a-z0-9][a-z0-9_-]{0,99}$"
+    },
+    mediaPath: {
+      type: "string",
+      pattern: "^content-media/[a-z0-9][a-z0-9-]*\\.(jpg|png|webp)$",
+      description: "Package-relative. Remote URLs are invalid in magento-content/1."
+    },
+    price: {
+      type: "string",
+      pattern: "^[0-9]+(\\.[0-9]{1,4})?$",
+      description: "Decimal string, never a float."
+    },
+    attributeCode: {
+      type: "string",
+      pattern: "^[a-z][a-z0-9_]{1,30}$"
+    },
+    attribute: {
+      type: "object",
+      additionalProperties: false,
+      required: ["code", "label", "input"],
+      properties: {
+        code: { $ref: "#/$defs/attributeCode" },
+        label: { type: "string", minLength: 1, maxLength: 200 },
+        input: { enum: ["select", "multiselect", "text", "boolean"] },
+        global: {
+          type: "boolean",
+          default: false,
+          description: "Required true for any attribute used as a configurable axis \u2014 Magento refuses a non-global axis."
+        },
+        swatch: { enum: ["visual", "text"] },
+        options: {
+          type: "array",
+          maxItems: 60,
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["key", "label"],
+            properties: {
+              key: { $ref: "#/$defs/key" },
+              label: { type: "string", minLength: 1, maxLength: 200 },
+              swatch: {
+                type: "string",
+                pattern: "^#[0-9a-fA-F]{6}$",
+                description: "Hex colour, for a visual swatch option."
+              }
+            }
+          }
+        }
+      }
+    },
+    attributeSet: {
+      type: "object",
+      additionalProperties: false,
+      required: ["key", "name"],
+      properties: {
+        key: { $ref: "#/$defs/key" },
+        name: { type: "string", minLength: 1, maxLength: 200 },
+        attributes: {
+          type: "array",
+          items: { $ref: "#/$defs/attributeCode" }
+        }
+      }
+    },
+    category: {
+      type: "object",
+      additionalProperties: false,
+      required: ["key", "name"],
+      properties: {
+        key: { $ref: "#/$defs/key" },
+        name: { type: "string", minLength: 1, maxLength: 200 },
+        url_key: { $ref: "#/$defs/key" },
+        description: { type: "string" },
+        display_mode: {
+          enum: ["PRODUCTS", "PRODUCTS_AND_PAGE"],
+          default: "PRODUCTS",
+          description: "The only two values Luma uses."
+        },
+        image: { $ref: "#/$defs/mediaPath" },
+        children: {
+          type: "array",
+          items: { $ref: "#/$defs/category" },
+          description: "Arbitrary depth. The importer derives path, level and url_path."
+        }
+      }
+    },
+    product: {
+      type: "object",
+      additionalProperties: false,
+      required: ["key", "sku", "type", "name", "price"],
+      properties: {
+        key: { $ref: "#/$defs/key" },
+        sku: {
+          type: "string",
+          pattern: "^[A-Z0-9-]{1,40}$",
+          description: "Unique across products AND variants."
+        },
+        type: { enum: ["simple", "configurable"] },
+        attribute_set: { $ref: "#/$defs/key" },
+        name: { type: "string", minLength: 1, maxLength: 200 },
+        url_key: { $ref: "#/$defs/key" },
+        price: { $ref: "#/$defs/price" },
+        special_price: {
+          $ref: "#/$defs/price",
+          description: "Must be strictly less than price."
+        },
+        weight: { $ref: "#/$defs/price" },
+        description: { type: "string" },
+        short_description: { type: "string" },
+        categories: {
+          type: "array",
+          items: { $ref: "#/$defs/key" }
+        },
+        image: { $ref: "#/$defs/mediaPath" },
+        gallery: {
+          type: "array",
+          maxItems: 8,
+          items: { $ref: "#/$defs/mediaPath" }
+        },
+        attributes: {
+          type: "object",
+          description: "Non-axis attribute values, keyed by attribute code. A multiselect takes an array of option keys.",
+          additionalProperties: {
+            oneOf: [
+              { type: "string" },
+              { type: "array", items: { type: "string" } }
+            ]
+          }
+        },
+        axes: {
+          type: "array",
+          minItems: 1,
+          maxItems: 3,
+          items: { $ref: "#/$defs/attributeCode" },
+          description: "Required for configurable, forbidden for simple."
+        },
+        variants: {
+          type: "array",
+          minItems: 1,
+          maxItems: 60,
+          items: { $ref: "#/$defs/variant" }
+        }
+      },
+      allOf: [
+        {
+          if: { properties: { type: { const: "configurable" } } },
+          then: { required: ["axes", "variants"] },
+          else: {
+            properties: {
+              axes: false,
+              variants: false
+            }
+          }
+        }
+      ]
+    },
+    variant: {
+      type: "object",
+      additionalProperties: false,
+      required: ["sku", "price", "values"],
+      properties: {
+        sku: { type: "string", pattern: "^[A-Z0-9-]{1,40}$" },
+        price: { $ref: "#/$defs/price" },
+        weight: { $ref: "#/$defs/price" },
+        image: { $ref: "#/$defs/mediaPath" },
+        values: {
+          type: "object",
+          description: "One value per axis, keyed by attribute code, valued by option key.",
+          minProperties: 1,
+          additionalProperties: { type: "string" }
+        }
+      }
+    },
+    cmsPage: {
+      type: "object",
+      additionalProperties: false,
+      required: ["key", "title", "content"],
+      properties: {
+        key: { $ref: "#/$defs/identifier" },
+        title: { type: "string", minLength: 1, maxLength: 200 },
+        content_heading: { type: "string", maxLength: 200 },
+        page_layout: {
+          enum: ["1column", "2columns-right"],
+          default: "1column"
+        },
+        content: {
+          type: "string",
+          description: `Escaped HTML with Magento directives: {{store url="\u2026"}}, {{media url="\u2026"}}, {{widget \u2026}}. Never Page Builder markup, never an absolute URL to the store's own pages, never <script>.`
+        },
+        meta_title: { type: "string" },
+        meta_description: { type: "string" }
+      }
+    },
+    cmsBlock: {
+      type: "object",
+      additionalProperties: false,
+      required: ["key", "title", "content"],
+      properties: {
+        key: { $ref: "#/$defs/identifier" },
+        title: { type: "string", minLength: 1, maxLength: 200 },
+        content: { type: "string" }
+      }
+    }
+  }
+};
+
+// src/providers/magento/schema/magento-content-request-1.schema.json
+var magento_content_request_1_schema_default = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  $id: "https://themeanax.com/schema/magento-content-request-1.schema.json",
+  title: "Magento demo content request (magento-content-request/1)",
+  description: "Written by the magento-theme plugin, read by `themeseed magento-demo --request`. Spec: docs/superpowers/specs/2026-10-21-magento-demo-content-contract.md \xA74",
+  type: "object",
+  additionalProperties: false,
+  required: ["format", "theme", "store", "catalog"],
+  properties: {
+    format: {
+      const: "magento-content-request/1"
+    },
+    theme: {
+      type: "string",
+      pattern: "^[a-z0-9][a-z0-9-]{0,99}$",
+      description: "Theme slug. Echoed into the output for traceability."
+    },
+    store: {
+      type: "object",
+      additionalProperties: false,
+      required: ["name", "topic"],
+      properties: {
+        name: { type: "string", minLength: 1 },
+        topic: {
+          type: "string",
+          minLength: 1,
+          description: "What the business sells. Drives every generated noun."
+        },
+        entry_noun: {
+          type: "string",
+          default: "Product",
+          description: "What ONE catalog entry IS \u2014 Product, Property, Dish, Course."
+        },
+        entry_noun_plural: { type: "string" },
+        language: { type: "string", default: "en" },
+        currency: {
+          type: "string",
+          pattern: "^[A-Z]{3}$",
+          default: "USD",
+          description: "Formatting only; prices are always plain decimal strings."
+        },
+        price_range: {
+          type: "object",
+          additionalProperties: false,
+          required: ["min", "max"],
+          properties: {
+            min: { type: "number", exclusiveMinimum: 0 },
+            max: { type: "number", exclusiveMinimum: 0 }
+          }
+        }
+      }
+    },
+    images: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        source: {
+          enum: ["auto", "local", "stock", "ai", "none"],
+          default: "auto"
+        }
+      }
+    },
+    catalog: {
+      type: "object",
+      additionalProperties: false,
+      required: ["departments"],
+      properties: {
+        departments: {
+          type: "array",
+          minItems: 2,
+          maxItems: 12,
+          items: { $ref: "#/$defs/department" }
+        },
+        products_per_leaf: {
+          type: "integer",
+          minimum: 1,
+          maximum: 40,
+          default: 6
+        },
+        configurable_ratio: {
+          type: "number",
+          minimum: 0,
+          maximum: 1,
+          default: 0.35,
+          description: "Share of products given variants. 0 means simple products only."
+        },
+        axes: {
+          type: "array",
+          maxItems: 3,
+          items: { $ref: "#/$defs/axis" }
+        },
+        seeds: {
+          type: "array",
+          maxItems: 60,
+          items: { $ref: "#/$defs/seed" }
+        }
+      }
+    },
+    pages: {
+      type: "array",
+      maxItems: 30,
+      items: { $ref: "#/$defs/cmsRequest" }
+    },
+    blocks: {
+      type: "array",
+      maxItems: 40,
+      items: { $ref: "#/$defs/cmsRequest" }
+    }
+  },
+  $defs: {
+    key: {
+      type: "string",
+      pattern: "^[a-z0-9][a-z0-9-]{0,99}$"
+    },
+    department: {
+      type: "object",
+      additionalProperties: false,
+      required: ["key", "name"],
+      properties: {
+        key: { $ref: "#/$defs/key" },
+        name: { type: "string", minLength: 1, maxLength: 200 },
+        description: { type: "string" },
+        children: {
+          type: "array",
+          maxItems: 12,
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["key", "name"],
+            properties: {
+              key: { $ref: "#/$defs/key" },
+              name: { type: "string", minLength: 1, maxLength: 200 },
+              description: { type: "string" }
+            }
+          }
+        }
+      }
+    },
+    axis: {
+      type: "object",
+      additionalProperties: false,
+      required: ["code", "label"],
+      properties: {
+        code: {
+          type: "string",
+          pattern: "^[a-z][a-z0-9_]{1,30}$"
+        },
+        label: { type: "string", minLength: 1 },
+        input: {
+          enum: ["select"],
+          default: "select",
+          description: "Magento refuses a non-select configurable axis."
+        },
+        swatch: { enum: ["visual", "text"] }
+      }
+    },
+    seed: {
+      type: "object",
+      additionalProperties: false,
+      required: ["key", "name"],
+      properties: {
+        key: { $ref: "#/$defs/key" },
+        name: { type: "string", minLength: 1, maxLength: 200 },
+        category: {
+          $ref: "#/$defs/key",
+          description: "Must name a department or child key."
+        },
+        price: { type: "string", pattern: "^[0-9]+(\\.[0-9]{1,4})?$" },
+        type: { enum: ["simple", "configurable"] },
+        sku: { type: "string", pattern: "^[A-Z0-9-]{1,40}$" },
+        description: { type: "string" },
+        short_description: { type: "string" }
+      }
+    },
+    cmsRequest: {
+      type: "object",
+      additionalProperties: false,
+      required: ["key", "title"],
+      properties: {
+        key: {
+          type: "string",
+          pattern: "^[a-z0-9][a-z0-9_-]{0,99}$",
+          description: "CMS identifier the template calls this by."
+        },
+        title: { type: "string", minLength: 1, maxLength: 200 },
+        page_layout: { enum: ["1column", "2columns-right"] }
+      }
+    }
+  }
+};
+
+// src/providers/magento/schema.ts
+var Ctor2 = import__2.default.default ?? import__2.default;
+var requestValidator2;
+var contentValidator2;
+function compile2(schema) {
+  return new Ctor2({ allErrors: true, strict: false }).compile(schema);
+}
+function validateMagentoRequestSchema(doc) {
+  requestValidator2 ??= compile2(magento_content_request_1_schema_default);
+  return requestValidator2(doc) ? [] : formatErrors2(requestValidator2.errors);
+}
+function validateMagentoContentSchema(doc) {
+  contentValidator2 ??= compile2(magento_content_1_schema_default);
+  return contentValidator2(doc) ? [] : formatErrors2(contentValidator2.errors);
+}
+function formatErrors2(errors) {
+  const lines = (errors ?? []).map((error51) => {
+    const where = error51.instancePath || "(root)";
+    const extra = error51.keyword === "additionalProperties" ? ` "${String(error51.params.additionalProperty)}"` : "";
+    return `${where}: ${error51.message ?? "invalid"}${extra}`;
+  });
+  return [...new Set(lines)];
+}
+
+// src/providers/magento/validate.ts
+var MEDIA_PREFIX2 = "content-media/";
+function validateMagentoContent(content, options = {}) {
+  const schemaProblems = validateMagentoContentSchema(content);
+  if (schemaProblems.length > 0) return schemaProblems;
+  const doc = content;
+  const problems = [];
+  const attributes = indexAttributes(doc, problems);
+  const setKeys = checkAttributeSets(doc, attributes, problems);
+  const categoryKeys = checkCategories(doc, problems);
+  const referenced = checkProducts(doc, attributes, setKeys, categoryKeys, problems);
+  checkCms(doc, referenced, problems);
+  checkMedia(doc, referenced, options, problems);
+  return problems;
+}
+function indexAttributes(doc, problems) {
+  const byCode = /* @__PURE__ */ new Map();
+  const optionKeys = /* @__PURE__ */ new Map();
+  for (const attribute of doc.attributes ?? []) {
+    if (byCode.has(attribute.code)) {
+      problems.push(`attributes: code "${attribute.code}" appears twice`);
+      continue;
+    }
+    byCode.set(attribute.code, attribute);
+    const keys = /* @__PURE__ */ new Set();
+    for (const option of attribute.options ?? []) {
+      if (keys.has(option.key)) {
+        problems.push(
+          `attributes."${attribute.code}": option key "${option.key}" appears twice`
+        );
+      }
+      keys.add(option.key);
+      if (attribute.swatch === "visual" && !option.swatch) {
+        problems.push(
+          `attributes."${attribute.code}": option "${option.key}" has no swatch colour, but the attribute is a visual swatch`
+        );
+      }
+    }
+    optionKeys.set(attribute.code, keys);
+    const needsOptions = attribute.input === "select" || attribute.input === "multiselect";
+    if (needsOptions && keys.size === 0) {
+      problems.push(
+        `attributes."${attribute.code}": a ${attribute.input} attribute with no options cannot be set on a product`
+      );
+    }
+  }
+  return { byCode, optionKeys };
+}
+function checkAttributeSets(doc, attributes, problems) {
+  const keys = /* @__PURE__ */ new Set();
+  for (const set2 of doc.attribute_sets ?? []) {
+    if (keys.has(set2.key))
+      problems.push(`attribute_sets: key "${set2.key}" appears twice`);
+    keys.add(set2.key);
+    for (const code of set2.attributes ?? []) {
+      if (!attributes.byCode.has(code)) {
+        problems.push(`attribute_sets."${set2.key}": unknown attribute "${code}"`);
+      }
+    }
+  }
+  return keys;
+}
+function checkCategories(doc, problems) {
+  const keys = /* @__PURE__ */ new Set();
+  const walk = (categories, depth, path15) => {
+    if (depth > 4) {
+      problems.push(`categories: "${path15}" nests deeper than 4 levels`);
+      return;
+    }
+    for (const category of categories) {
+      if (keys.has(category.key)) {
+        problems.push(`categories: key "${category.key}" appears twice`);
+      }
+      keys.add(category.key);
+      if (category.children?.length) {
+        walk(category.children, depth + 1, `${path15}/${category.key}`);
+      }
+    }
+  };
+  walk(doc.categories, 1, "");
+  return keys;
+}
+function checkProducts(doc, attributes, setKeys, categoryKeys, problems) {
+  const referenced = /* @__PURE__ */ new Set();
+  const productKeys = /* @__PURE__ */ new Set();
+  const skus = /* @__PURE__ */ new Set();
+  if (doc.products.length > MAX_PRODUCTS) {
+    problems.push(
+      `products: ${doc.products.length} exceeds the ${MAX_PRODUCTS} ceiling; a storefront demo is not a catalog import`
+    );
+  }
+  for (const category of doc.categories) collectImage(category.image, referenced);
+  for (const category of flatten2(doc.categories))
+    collectImage(category.image, referenced);
+  for (const product of doc.products) {
+    const where = `products."${product.key}"`;
+    if (productKeys.has(product.key))
+      problems.push(`products: key "${product.key}" appears twice`);
+    productKeys.add(product.key);
+    checkSku(product.sku, skus, where, problems);
+    if (product.attribute_set && !setKeys.has(product.attribute_set)) {
+      problems.push(`${where}: unknown attribute_set "${product.attribute_set}"`);
+    }
+    for (const key of product.categories ?? []) {
+      if (!categoryKeys.has(key)) problems.push(`${where}: unknown category "${key}"`);
+    }
+    checkSpecialPrice(product, where, problems);
+    checkProductAttributes(product, attributes, where, problems);
+    checkVariants(product, attributes, skus, where, problems);
+    collectImage(product.image, referenced);
+    for (const path15 of product.gallery ?? []) collectImage(path15, referenced);
+    for (const variant of product.variants ?? []) collectImage(variant.image, referenced);
+  }
+  return referenced;
+}
+function checkSku(sku, seen, where, problems) {
+  if (seen.has(sku)) {
+    problems.push(
+      `${where}: SKU "${sku}" is already used; SKUs are unique across products and variants`
+    );
+  }
+  seen.add(sku);
+}
+function checkSpecialPrice(product, where, problems) {
+  if (!product.special_price) return;
+  if (Number(product.special_price) >= Number(product.price)) {
+    problems.push(
+      `${where}: special_price ${product.special_price} is not less than price ${product.price}`
+    );
+  }
+}
+function checkProductAttributes(product, attributes, where, problems) {
+  for (const [code, value] of Object.entries(product.attributes ?? {})) {
+    const attribute = attributes.byCode.get(code);
+    if (!attribute) {
+      problems.push(`${where}: unknown attribute "${code}"`);
+      continue;
+    }
+    if (product.axes?.includes(code)) {
+      problems.push(
+        `${where}: "${code}" is an axis, so its value belongs on each variant rather than on the parent`
+      );
+    }
+    const values = Array.isArray(value) ? value : [value];
+    if (Array.isArray(value) && attribute.input !== "multiselect") {
+      problems.push(
+        `${where}: "${code}" is a ${attribute.input}, so it takes one value, not a list`
+      );
+    }
+    const known = attributes.optionKeys.get(code) ?? /* @__PURE__ */ new Set();
+    if (attribute.input === "select" || attribute.input === "multiselect") {
+      for (const option of values) {
+        if (!known.has(option)) {
+          problems.push(`${where}: "${code}" has no option "${option}"`);
+        }
+      }
+    }
+  }
+}
+function checkVariants(product, attributes, skus, where, problems) {
+  if (product.type !== "configurable") return;
+  const axes = product.axes ?? [];
+  for (const code of axes) {
+    const attribute = attributes.byCode.get(code);
+    if (!attribute) {
+      problems.push(`${where}: unknown axis attribute "${code}"`);
+      continue;
+    }
+    if (attribute.global !== true) {
+      problems.push(
+        `${where}: axis "${code}" must be global:true \u2014 Magento refuses a non-global configurable axis`
+      );
+    }
+    if (attribute.input !== "select") {
+      problems.push(
+        `${where}: axis "${code}" must be a select, not a ${attribute.input}`
+      );
+    }
+  }
+  const combinations = /* @__PURE__ */ new Set();
+  for (const variant of product.variants ?? []) {
+    checkSku(variant.sku, skus, `${where}.variants."${variant.sku}"`, problems);
+    const parts = [];
+    for (const code of axes) {
+      const value = variant.values[code];
+      if (value === void 0) {
+        problems.push(`${where}.variants."${variant.sku}": no value for axis "${code}"`);
+        parts.push("\0");
+        continue;
+      }
+      const known = attributes.optionKeys.get(code) ?? /* @__PURE__ */ new Set();
+      if (!known.has(value)) {
+        problems.push(
+          `${where}.variants."${variant.sku}": "${code}" has no option "${value}"`
+        );
+      }
+      parts.push(value);
+    }
+    for (const code of Object.keys(variant.values)) {
+      if (!axes.includes(code)) {
+        problems.push(
+          `${where}.variants."${variant.sku}": "${code}" is not one of this product's axes`
+        );
+      }
+    }
+    const signature = parts.join("|");
+    if (combinations.has(signature)) {
+      problems.push(
+        `${where}: two variants share the combination ${signature.replace(/\|/g, " + ")}`
+      );
+    }
+    combinations.add(signature);
+  }
+}
+var SCRIPT = /<script\b/i;
+var ABSOLUTE_LINK = /\b(?:href|src)\s*=\s*["']https?:\/\//i;
+var REMOTE_IMG = /<img\b[^>]*\bsrc\s*=\s*["']https?:\/\//i;
+function checkCms(doc, referenced, problems) {
+  const identifiers = /* @__PURE__ */ new Set();
+  const check2 = (kind, entries) => {
+    for (const entry of entries) {
+      const where = `${kind}."${entry.key}"`;
+      if (identifiers.has(`${kind}:${entry.key}`)) {
+        problems.push(`${kind}: identifier "${entry.key}" appears twice`);
+      }
+      identifiers.add(`${kind}:${entry.key}`);
+      if (SCRIPT.test(entry.content))
+        problems.push(`${where}: content contains <script>`);
+      if (REMOTE_IMG.test(entry.content)) {
+        problems.push(
+          `${where}: content has a remote <img>; body images must reference content-media/ paths`
+        );
+      } else if (ABSOLUTE_LINK.test(entry.content)) {
+        problems.push(
+          `${where}: content has an absolute URL; use {{store url="\u2026"}} so it resolves against the store's own base URL`
+        );
+      }
+      for (const path15 of entry.content.matchAll(
+        /content-media\/[a-z0-9][a-z0-9-]*\.(?:jpg|png|webp)/g
+      )) {
+        referenced.add(path15[0]);
+      }
+    }
+  };
+  check2("pages", doc.pages ?? []);
+  check2("blocks", doc.blocks ?? []);
+}
+function checkMedia(doc, referenced, options, problems) {
+  const { media, credits } = options;
+  if (!media) return;
+  const names = new Set(media.map((file2) => file2.name));
+  for (const path15 of referenced) {
+    const name = path15.slice(MEDIA_PREFIX2.length);
+    if (!names.has(name))
+      problems.push(`${path15} is referenced but not in content-media/`);
+  }
+  let total = 0;
+  for (const file2 of media) {
+    total += file2.bytes.byteLength;
+    if (!MAGENTO_MEDIA_LIMITS.namePattern.test(file2.name)) {
+      problems.push(
+        `content-media/${file2.name}: name must match ${MAGENTO_MEDIA_LIMITS.namePattern}`
+      );
+    }
+    if (!referenced.has(`${MEDIA_PREFIX2}${file2.name}`)) {
+      problems.push(`content-media/${file2.name} is not referenced by anything`);
+    }
+    if (file2.bytes.byteLength > MAGENTO_MEDIA_LIMITS.maxFileBytes) {
+      problems.push(
+        `content-media/${file2.name}: ${Math.round(file2.bytes.byteLength / 1024)} KB exceeds the ${MAGENTO_MEDIA_LIMITS.maxFileBytes / 1024} KB limit`
+      );
+    }
+    const probed = probeImage(file2.bytes);
+    if (probed?.width && probed.height) {
+      const longEdge = Math.max(probed.width, probed.height);
+      if (longEdge > MAGENTO_MEDIA_LIMITS.maxLongEdge) {
+        problems.push(
+          `content-media/${file2.name}: ${longEdge}px on the long edge exceeds ${MAGENTO_MEDIA_LIMITS.maxLongEdge}px`
+        );
+      }
+    }
+  }
+  if (total > MAGENTO_MEDIA_LIMITS.maxTotalBytes) {
+    problems.push(
+      `content-media/ is ${Math.round(total / 1024 / 1024)} MB, over the ${MAGENTO_MEDIA_LIMITS.maxTotalBytes / 1024 / 1024} MB limit`
+    );
+  }
+  if (credits) {
+    const credited = new Set(credits.assets.map((asset) => asset.path));
+    for (const file2 of media) {
+      if (!credited.has(`${MEDIA_PREFIX2}${file2.name}`)) {
+        problems.push(`content-media/${file2.name} has no credit entry`);
+      }
+    }
+  }
+}
+function flatten2(categories) {
+  const out = [];
+  const walk = (list) => {
+    for (const category of list) {
+      out.push(category);
+      if (category.children) walk(category.children);
+    }
+  };
+  walk(categories);
+  return out;
+}
+function collectImage(path15, into) {
+  if (path15) into.add(path15);
+}
+
+// src/providers/magento/write.ts
+import { promises as fs11 } from "node:fs";
+import path11 from "node:path";
+async function writeMagentoPackage(args) {
+  const { outDir } = args;
+  await fs11.mkdir(outDir, { recursive: true });
+  const stamp = `${process.pid}-${Date.now()}`;
+  const stagedCatalog = path11.join(outDir, `.catalog.json.${stamp}.tmp`);
+  const stagedMedia = path11.join(outDir, `.content-media.${stamp}.tmp`);
+  try {
+    await fs11.writeFile(stagedCatalog, `${JSON.stringify(args.content, null, 2)}
+`);
+    await fs11.mkdir(stagedMedia, { recursive: true });
+    for (const file2 of args.media) {
+      await fs11.writeFile(path11.join(stagedMedia, file2.name), file2.bytes);
+    }
+    await fs11.rm(path11.join(outDir, "content-media"), { recursive: true, force: true });
+    await fs11.rename(stagedMedia, path11.join(outDir, "content-media"));
+    await fs11.rename(stagedCatalog, path11.join(outDir, "catalog.json"));
+  } finally {
+    await fs11.rm(stagedCatalog, { force: true });
+    await fs11.rm(stagedMedia, { recursive: true, force: true });
+  }
+  await fs11.mkdir(path11.dirname(args.creditsPath), { recursive: true });
+  const stagedCredits = `${args.creditsPath}.${stamp}.tmp`;
+  try {
+    await fs11.writeFile(stagedCredits, `${JSON.stringify(args.credits, null, 2)}
+`);
+    await fs11.rename(stagedCredits, args.creditsPath);
+  } finally {
+    await fs11.rm(stagedCredits, { force: true });
+  }
+  return [
+    "catalog.json",
+    ...args.media.map((file2) => `content-media/${file2.name}`).sort()
+  ];
+}
+
+// src/providers/magento/index.ts
+var MagentoDemoUsageError = class extends ThemeseedError {
+  constructor(message, hint) {
+    super(message, { code: "MAGENTO_DEMO_USAGE", ...hint ? { hint } : {} });
+    this.name = "MagentoDemoUsageError";
+  }
+};
+async function exportMagentoDemo(options) {
+  const request = await loadRequest2(options.request);
+  const outDir = path12.resolve(options.outDir);
+  const creditsPath = path12.resolve(options.creditsPath);
+  if (creditsPath === outDir || creditsPath.startsWith(outDir + path12.sep)) {
+    throw new MagentoDemoUsageError(
+      `--credits (${options.creditsPath}) is inside --out (${options.outDir}); it would ship in the theme zip`,
+      "Write credits next to the content request, outside the theme folder."
+    );
+  }
+  const warnings = [];
+  const choice = await chooseMagentoImageSource(request.images?.source ?? "auto", {
+    ...options.imageSource ? { override: options.imageSource } : {},
+    ...options.imageSourceOptions ? { sourceOptions: options.imageSourceOptions } : {},
+    ...options.env ? { env: options.env } : {}
+  });
+  warnings.push(...choice.warnings);
+  const media = new MediaCollector(request.store.name, options.fetchBytes);
+  const version2 = await readVersion();
+  const generated = await generateMagentoContent({
+    request,
+    media,
+    imageSource: choice.source,
+    generator: `themeseed@${version2}`,
+    ...options.engine ? { engine: options.engine } : {},
+    ...options.onProgress ? { onProgress: options.onProgress } : {}
+  });
+  warnings.push(...generated.warnings);
+  if (choice.source && media.files.length === 0 && media.skipped > 0) {
+    throw new ThemeseedError(
+      `Every image was rejected (${media.skipped}); refusing to write a demo with no pictures`,
+      {
+        code: "NO_USABLE_IMAGES",
+        hint: `Images must be jpg/png/webp, at most 2000px on the long edge and 500 KB each. First problem: ${media.warnings[0] ?? "see warnings"}. Resize the source images or use another image source.`
+      }
+    );
+  }
+  const credits = {
+    assets: [...media.credits].sort((a, b) => a.path.localeCompare(b.path))
+  };
+  const problems = validateMagentoContent(generated.content, {
+    media: media.files,
+    credits
+  });
+  if (problems.length > 0) {
+    throw new ThemeseedError(
+      `Refusing to write: the generated package is invalid (${problems.length} problem${problems.length === 1 ? "" : "s"})`,
+      {
+        code: "INVALID_OUTPUT",
+        hint: problems.slice(0, 8).join("; ") + (problems.length > 8 ? `; \u2026and ${problems.length - 8} more` : "") + ". If a seed caused it, fix that seed in the content request."
+      }
+    );
+  }
+  const written = await writeMagentoPackage({
+    outDir,
+    creditsPath,
+    content: generated.content,
+    media: media.files,
+    credits
+  });
+  return {
+    ok: true,
+    written,
+    counts: generated.counts,
+    credits: options.creditsPath,
+    warnings
+  };
+}
+async function loadRequest2(source) {
+  let doc = source;
+  if (typeof source === "string") {
+    let raw;
+    try {
+      raw = await fs12.readFile(source, "utf8");
+    } catch (err) {
+      throw new MagentoDemoUsageError(
+        `Cannot read the content request ${source}: ${err instanceof Error ? err.message : String(err)}`,
+        "Pass --request <path to a magento-content-request/1 JSON file>."
+      );
+    }
+    try {
+      doc = JSON.parse(raw);
+    } catch (err) {
+      throw new MagentoDemoUsageError(
+        `${source} is not valid JSON: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
+  }
+  const problems = validateMagentoRequestSchema(doc);
+  if (problems.length > 0) {
+    throw new MagentoDemoUsageError(
+      `The content request is not a valid magento-content-request/1 document:
+  - ${problems.join("\n  - ")}`,
+      "Fix the request (schema: magento-content-request-1.schema.json)."
+    );
+  }
+  const request = doc;
+  checkKeys(request);
+  return request;
+}
+function checkKeys(request) {
+  const categoryKeys = /* @__PURE__ */ new Set();
+  for (const department of request.catalog.departments) {
+    if (categoryKeys.has(department.key)) {
+      throw new MagentoDemoUsageError(
+        `catalog.departments: key "${department.key}" appears twice`,
+        "Department and child keys share one namespace and must be unique."
+      );
+    }
+    categoryKeys.add(department.key);
+    for (const child of department.children ?? []) {
+      if (categoryKeys.has(child.key)) {
+        throw new MagentoDemoUsageError(
+          `catalog.departments: key "${child.key}" appears twice`,
+          "Department and child keys share one namespace and must be unique."
+        );
+      }
+      categoryKeys.add(child.key);
+    }
+  }
+  const seedKeys = /* @__PURE__ */ new Set();
+  for (const seed of request.catalog.seeds ?? []) {
+    if (seedKeys.has(seed.key)) {
+      throw new MagentoDemoUsageError(
+        `catalog.seeds: key "${seed.key}" appears twice`,
+        "Seed keys are the import idempotency key and must be unique."
+      );
+    }
+    seedKeys.add(seed.key);
+    if (seed.category && !categoryKeys.has(seed.category)) {
+      throw new MagentoDemoUsageError(
+        `catalog.seeds."${seed.key}": unknown category "${seed.category}"`,
+        `Name one of: ${[...categoryKeys].join(", ")}`
+      );
+    }
+  }
+}
+
 // src/providers/ghost/client.ts
 import crypto from "node:crypto";
 import { basename } from "node:path";
@@ -37754,8 +39368,8 @@ var GhostClient = class {
       ...extra
     };
   }
-  async request(method, path13, init = {}) {
-    const url2 = new URL(`${this.baseUrl}/ghost/api/admin${path13}`);
+  async request(method, path15, init = {}) {
+    const url2 = new URL(`${this.baseUrl}/ghost/api/admin${path15}`);
     for (const [key, value] of Object.entries(init.query ?? {})) {
       if (value !== void 0) url2.searchParams.set(key, String(value));
     }
@@ -37773,7 +39387,7 @@ var GhostClient = class {
     } catch (err) {
       if (err.name === "AbortError") {
         throw new ProviderError(
-          `Ghost request timed out after ${this.timeoutMs}ms: ${method} ${path13}`,
+          `Ghost request timed out after ${this.timeoutMs}ms: ${method} ${path15}`,
           {
             code: "GHOST_TIMEOUT",
             hint: "Is the site reachable and awake?"
@@ -37788,7 +39402,7 @@ var GhostClient = class {
     } finally {
       clearTimeout(timer);
     }
-    return this.parse(response, `${method} ${path13}`);
+    return this.parse(response, `${method} ${path15}`);
   }
   async parse(response, context) {
     const text2 = await response.text();
@@ -37993,8 +39607,8 @@ function hintForStatus(status) {
 }
 
 // src/providers/ghost/posts.ts
-import { promises as fs11 } from "node:fs";
-import path11 from "node:path";
+import { promises as fs13 } from "node:fs";
+import path13 from "node:path";
 async function publishPosts(client, items, options = {}) {
   const results = [];
   const uploadCache = /* @__PURE__ */ new Map();
@@ -38202,7 +39816,7 @@ async function uploadImageRef(client, ref, maxRetries) {
   };
 }
 async function readLocalImage(location) {
-  const buffer = await fs11.readFile(location);
+  const buffer = await fs13.readFile(location);
   return new Uint8Array(buffer);
 }
 async function downloadImage(url2) {
@@ -38220,7 +39834,7 @@ async function downloadImage(url2) {
   }
 }
 function filenameFor(ref, format) {
-  const base = ref.kind === "file" ? path11.basename(ref.location).replace(/\.\w+$/, "") : (new URL(ref.location).pathname.split("/").pop() ?? "image").replace(
+  const base = ref.kind === "file" ? path13.basename(ref.location).replace(/\.\w+$/, "") : (new URL(ref.location).pathname.split("/").pop() ?? "image").replace(
     /\.\w+$/,
     ""
   );
@@ -38345,9 +39959,9 @@ async function publishTags(client, items, options = {}) {
 }
 
 // src/providers/ghost/theme/local-theme-source.ts
-import { promises as fs12 } from "node:fs";
+import { promises as fs14 } from "node:fs";
 import os3 from "node:os";
-import path12 from "node:path";
+import path14 from "node:path";
 
 // src/providers/ghost/theme/signals.ts
 function defaultCapabilities(themeName) {
@@ -38540,7 +40154,7 @@ var LocalThemeSource = class {
   // -- directory resolution -------------------------------------------------
   async resolveThemeDir() {
     for (const base of this.candidateThemeDirs()) {
-      const candidate = path12.join(base, this.options.themeName);
+      const candidate = path14.join(base, this.options.themeName);
       if (await isDirectory(candidate)) {
         return candidate;
       }
@@ -38557,16 +40171,16 @@ var LocalThemeSource = class {
     );
     return [
       ...explicit,
-      path12.join(process.cwd(), "content", "themes"),
-      path12.join(process.cwd(), "themes"),
+      path14.join(process.cwd(), "content", "themes"),
+      path14.join(process.cwd(), "themes"),
       "/var/lib/ghost/content/themes",
-      path12.join(home, "ghost", "content", "themes")
+      path14.join(home, "ghost", "content", "themes")
     ];
   }
   // -- readers --------------------------------------------------------------
   async readPackage(dir, evidence, capabilities) {
     try {
-      const raw = await fs12.readFile(path12.join(dir, "package.json"), "utf8");
+      const raw = await fs14.readFile(path14.join(dir, "package.json"), "utf8");
       const pkg = JSON.parse(raw);
       if (pkg.version) capabilities.themeVersion = pkg.version;
       if (pkg.description) capabilities.description = pkg.description;
@@ -38590,13 +40204,13 @@ var LocalThemeSource = class {
     for (const file2 of files) {
       let text2;
       try {
-        text2 = await fs12.readFile(file2, "utf8");
+        text2 = await fs14.readFile(file2, "utf8");
       } catch {
         continue;
       }
       combined += `
 ${text2}`;
-      const base = path12.basename(file2);
+      const base = path14.basename(file2);
       if (base === "post.hbs") post = text2;
       if (base === "index.hbs") index = text2;
     }
@@ -38609,7 +40223,7 @@ ${text2}`;
       if (/cards(\.min)?\.css$/.test(file2)) continue;
       try {
         css += `
-${await fs12.readFile(file2, "utf8")}`;
+${await fs14.readFile(file2, "utf8")}`;
       } catch {
         continue;
       }
@@ -38707,7 +40321,7 @@ function cardAssetsEnabled(value) {
 }
 async function isDirectory(target) {
   try {
-    return (await fs12.stat(target)).isDirectory();
+    return (await fs14.stat(target)).isDirectory();
   } catch {
     return false;
   }
@@ -38718,13 +40332,13 @@ async function collectFiles(root, extension, maxDepth) {
     if (depth > maxDepth) return;
     let entries;
     try {
-      entries = await fs12.readdir(dir, { withFileTypes: true });
+      entries = await fs14.readdir(dir, { withFileTypes: true });
     } catch {
       return;
     }
     for (const entry of entries) {
       if (entry.name.startsWith(".") || entry.name === "node_modules") continue;
-      const full = path12.join(dir, entry.name);
+      const full = path14.join(dir, entry.name);
       if (entry.isDirectory()) await walk(full, depth + 1);
       else if (entry.isFile() && entry.name.endsWith(extension)) found.push(full);
     }
@@ -39472,10 +41086,10 @@ function registerContentTools(server) {
     "export_content",
     {
       title: "Export demo content as an importable file",
-      description: 'Generates the same content generate_posts would, but writes it to disk as an import file instead of publishing it live. Needs no site and no credentials. platform "ghost" writes content-export.zip with the images bundled inside; platform "wordpress" writes demo-content.xml (WXR) whose images the WordPress importer downloads from their source URLs at import time \u2014 so for wordpress use a URL-backed imageSource (stock) or none, never local/ai. Use this to ship demo content inside a theme package; use generate_posts when you have a live site to fill. Pass `pages` for static pages \u2014 set needsBody false where a theme template renders the page itself, or suppliedBody to use markup you already have (for wordpress, suppliedBody should be serialized Gutenberg block markup). platform "nic-demo" writes the NIC Core demo package (posts.json + content-media/) from a content request \u2014 pass `request` and `credits`; it ignores topic/count/pages. Product seeds (`types.product.seeds[]`) may carry a WooCommerce `product` block (badge, rating, review_count, attributes) and `terms` (product_cat/product_tag slugs): they are kept verbatim and extra products are generated in the same style (attribute names and shapes, price range, categories, topic-named titles).',
+      description: 'Generates the same content generate_posts would, but writes it to disk as an import file instead of publishing it live. Needs no site and no credentials. platform "ghost" writes content-export.zip with the images bundled inside; platform "wordpress" writes demo-content.xml (WXR) whose images the WordPress importer downloads from their source URLs at import time \u2014 so for wordpress use a URL-backed imageSource (stock) or none, never local/ai. Use this to ship demo content inside a theme package; use generate_posts when you have a live site to fill. Pass `pages` for static pages \u2014 set needsBody false where a theme template renders the page itself, or suppliedBody to use markup you already have (for wordpress, suppliedBody should be serialized Gutenberg block markup). platform "nic-demo" writes the NIC Core demo package (posts.json + content-media/) from a content request \u2014 pass `request` and `credits`; it ignores topic/count/pages. Product seeds (`types.product.seeds[]`) may carry a WooCommerce `product` block (badge, rating, review_count, attributes) and `terms` (product_cat/product_tag slugs): they are kept verbatim and extra products are generated in the same style (attribute names and shapes, price range, categories, topic-named titles). platform "magento" writes the Magento demo package (catalog.json + content-media/) from a magento-content-request/1 document \u2014 nested categories, attribute sets, swatch attributes, simple and configurable products, CMS pages and blocks in Magento\u2019s own directive dialect. Pass `request` and `credits`; it ignores topic/count/pages.',
       inputSchema: {
-        platform: external_exports.enum(["ghost", "wordpress", "nic-demo"]).default("ghost").describe(
-          "Which CMS the file targets: ghost \u2192 content-export.zip, wordpress \u2192 demo-content.xml (WXR 1.2), nic-demo \u2192 posts.json + content-media/ for a NIC Core theme (needs `request` and `credits`; outDir is the theme's demo/ folder)."
+        platform: external_exports.enum(["ghost", "wordpress", "nic-demo", "magento"]).default("ghost").describe(
+          "Which CMS the file targets: ghost \u2192 content-export.zip, wordpress \u2192 demo-content.xml (WXR 1.2), nic-demo \u2192 posts.json + content-media/ for a NIC Core theme, magento \u2192 catalog.json + content-media/ for a Magento theme (both need `request` and `credits`; outDir is the theme's demo/ folder)."
         ),
         topic: external_exports.string().optional().describe('Subject of the publication, e.g. "SaaS productivity blog".'),
         outDir: external_exports.string().describe(
@@ -39503,10 +41117,10 @@ function registerContentTools(server) {
         authorName: external_exports.string().optional(),
         includeVideo: external_exports.boolean().default(true),
         request: external_exports.union([external_exports.string(), external_exports.record(external_exports.string(), external_exports.unknown())]).optional().describe(
-          'platform "nic-demo" only: a nic-content-request/1 document, or the path to one. Seeds are kept verbatim; stock images are refused for themeforest/wordpress.org targets.'
+          'platform "nic-demo" or "magento" only: a nic-content-request/1 or magento-content-request/1 document, or the path to one. Seeds are kept verbatim; under nic-demo, stock images are refused for themeforest/wordpress.org targets.'
         ),
         credits: external_exports.string().optional().describe(
-          'platform "nic-demo" only: where to write the image credits JSON. Must be outside outDir.'
+          'platform "nic-demo" or "magento" only: where to write the image credits JSON. Must be outside outDir.'
         )
       }
     },
@@ -39551,6 +41165,46 @@ function registerContentTools(server) {
           ...report2.warnings.map((w) => `  warning: ${w}`)
         ];
         return text(lines2.join("\n"), { ...report2, platform: "nic-demo" });
+      }
+      if (args.platform === "magento") {
+        if (!args.request || !args.credits) {
+          throw new ThemeseedError(
+            'platform "magento" needs both `request` and `credits`',
+            {
+              code: "MAGENTO_DEMO_USAGE",
+              hint: "Pass request (a magento-content-request/1 object or file path) and credits (output path)."
+            }
+          );
+        }
+        let report2;
+        try {
+          report2 = await exportMagentoDemo({
+            request: args.request,
+            outDir: args.outDir,
+            creditsPath: args.credits
+          });
+        } catch (err) {
+          if (err instanceof ThemeseedError) {
+            return {
+              content: [{ type: "text", text: describeError(err) }],
+              isError: true,
+              structuredContent: {
+                ok: false,
+                code: err.code,
+                error: err.message,
+                ...err.hint ? { hint: err.hint } : {}
+              }
+            };
+          }
+          throw err;
+        }
+        const counts = Object.entries(report2.counts).filter(([, n]) => n > 0).map(([type, n]) => `${type} ${n}`).join(", ");
+        const lines2 = [
+          `Wrote ${args.outDir}/catalog.json and ${report2.written.length - 1} image(s) (${counts})`,
+          `  credits: ${report2.credits}`,
+          ...report2.warnings.map((w) => `  warning: ${w}`)
+        ];
+        return text(lines2.join("\n"), { ...report2, platform: "magento" });
       }
       const topic = args.topic?.trim() || await askForTopic(server);
       const site = args.navigation || args.secondaryNavigation ? {
