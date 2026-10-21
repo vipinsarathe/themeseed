@@ -442,9 +442,15 @@ function checkMedia(
   }
 
   if (credits) {
-    const credited = new Set(credits.assets.map((asset) => asset.path));
+    // A credit entry's path is package-relative the way the THEME sees it —
+    // `demo/content-media/x.jpg` — because the credits file is read beside the
+    // theme, not beside this package. Matching on the file name is what makes
+    // the two conventions agree without either having to know the other's.
+    const credited = new Set(
+      credits.assets.map((asset) => asset.path.slice(asset.path.lastIndexOf('/') + 1))
+    );
     for (const file of media) {
-      if (!credited.has(`${MEDIA_PREFIX}${file.name}`)) {
+      if (!credited.has(file.name)) {
         problems.push(`content-media/${file.name} has no credit entry`);
       }
     }

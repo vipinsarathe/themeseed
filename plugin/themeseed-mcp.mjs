@@ -39123,9 +39123,11 @@ function checkMedia(doc, referenced, options, problems) {
     );
   }
   if (credits) {
-    const credited = new Set(credits.assets.map((asset) => asset.path));
+    const credited = new Set(
+      credits.assets.map((asset) => asset.path.slice(asset.path.lastIndexOf("/") + 1))
+    );
     for (const file2 of media) {
-      if (!credited.has(`${MEDIA_PREFIX2}${file2.name}`)) {
+      if (!credited.has(file2.name)) {
         problems.push(`content-media/${file2.name} has no credit entry`);
       }
     }

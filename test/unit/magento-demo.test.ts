@@ -323,6 +323,59 @@ describe('magento validation', () => {
     expect(validateMagentoContent(pkg())).toEqual([]);
   });
 
+  it('matches a credit entry by file name, not by its path prefix', () => {
+    // A credit entry's path is relative to the THEME (`demo/content-media/x`),
+    // because the credits file is read beside the theme. Comparing the whole
+    // path made every image look uncredited and refused every package that
+    // actually had images.
+    const media = [{ name: 'sofa.png', bytes: new Uint8Array([1, 2, 3]) }];
+    const credits = {
+      assets: [
+        {
+          path: 'demo/content-media/sofa.png',
+          license: 'GPL-2.0-or-later',
+          source: 'themeseed',
+          author: 'Store',
+        },
+      ],
+    };
+
+    const content = pkg({
+      products: [
+        {
+          key: 'one',
+          sku: 'A-1',
+          type: 'simple',
+          name: 'One',
+          price: '10.00',
+          image: 'content-media/sofa.png',
+        },
+      ],
+    });
+
+    expect(validateMagentoContent(content, { media, credits })).toEqual([]);
+  });
+
+  it('still reports an image that genuinely has no credit', () => {
+    const media = [{ name: 'sofa.png', bytes: new Uint8Array([1, 2, 3]) }];
+    const content = pkg({
+      products: [
+        {
+          key: 'one',
+          sku: 'A-1',
+          type: 'simple',
+          name: 'One',
+          price: '10.00',
+          image: 'content-media/sofa.png',
+        },
+      ],
+    });
+
+    expect(
+      validateMagentoContent(content, { media, credits: { assets: [] } }).join(' ')
+    ).toMatch(/has no credit entry/);
+  });
+
   it('rejects a non-global configurable axis', () => {
     const problems = validateMagentoContent(
       pkg({
