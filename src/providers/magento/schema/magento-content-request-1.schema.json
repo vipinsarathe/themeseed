@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://themeanax.com/schema/magento-content-request-1.schema.json",
+  "title": "Magento demo content request (magento-content-request/1)",
+  "description": "Written by the magento-theme plugin, read by `themeseed magento-demo --request`. Spec: docs/superpowers/specs/2026-10-21-magento-demo-content-contract.md §4",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "theme", "store", "catalog"],
+  "properties": {
+    "format": {
+      "const": "magento-content-request/1"
+    },
+    "theme": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,99}$",
+      "description": "Theme slug. Echoed into the output for traceability."
+    },
+    "store": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "topic"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "topic": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What the business sells. Drives every generated noun."
+        },
+        "entry_noun": {
+          "type": "string",
+          "default": "Product",
+          "description": "What ONE catalog entry IS — Product, Property, Dish, Course."
+        },
+        "entry_noun_plural": { "type": "string" },
+        "language": { "type": "string", "default": "en" },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "default": "USD",
+          "description": "Formatting only; prices are always plain decimal strings."
+        },
+        "price_range": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["min", "max"],
+          "properties": {
+            "min": { "type": "number", "exclusiveMinimum": 0 },
+            "max": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        }
+      }
+    },
+    "images": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "enum": ["auto", "local", "stock", "ai", "none"],
+          "default": "auto"
+        }
+      }
+    },
+    "catalog": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["departments"],
+      "properties": {
+        "departments": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/department" }
+        },
+        "products_per_leaf": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 40,
+          "default": 6
+        },
+        "configurable_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.35,
+          "description": "Share of products given variants. 0 means simple products only."
+        },
+        "axes": {
+          "type": "array",
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/axis" }
+        },
+        "seeds": {
+          "type": "array",
+          "maxItems": 60,
+          "items": { "$ref": "#/$defs/seed" }
+        }
+      }
+    },
+    "pages": {
+      "type": "array",
+      "maxItems": 30,
+      "items": { "$ref": "#/$defs/cmsRequest" }
+    },
+    "blocks": {
+      "type": "array",
+      "maxItems": 40,
+      "items": { "$ref": "#/$defs/cmsRequest" }
+    }
+  },
+  "$defs": {
+    "key": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,99}$"
+    },
+    "department": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "name"],
+      "properties": {
+        "key": { "$ref": "#/$defs/key" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "description": { "type": "string" },
+        "children": {
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["key", "name"],
+            "properties": {
+              "key": { "$ref": "#/$defs/key" },
+              "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+              "description": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "axis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "label"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{1,30}$"
+        },
+        "label": { "type": "string", "minLength": 1 },
+        "input": {
+          "enum": ["select"],
+          "default": "select",
+          "description": "Magento refuses a non-select configurable axis."
+        },
+        "swatch": { "enum": ["visual", "text"] }
+      }
+    },
+    "seed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "name"],
+      "properties": {
+        "key": { "$ref": "#/$defs/key" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "category": {
+          "$ref": "#/$defs/key",
+          "description": "Must name a department or child key."
+        },
+        "price": { "type": "string", "pattern": "^[0-9]+(\\.[0-9]{1,4})?$" },
+        "type": { "enum": ["simple", "configurable"] },
+        "sku": { "type": "string", "pattern": "^[A-Z0-9-]{1,40}$" },
+        "description": { "type": "string" },
+        "short_description": { "type": "string" }
+      }
+    },
+    "cmsRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "title"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,99}$",
+          "description": "CMS identifier the template calls this by."
+        },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "page_layout": { "enum": ["1column", "2columns-right"] }
+      }
+    }
+  }
+}

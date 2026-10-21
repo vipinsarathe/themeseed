@@ -254,6 +254,55 @@ The same operation is the `export_content` MCP tool with `platform: "nic-demo"`,
 (`docs/superpowers/specs/2026-10-13-demo-content-contract.md`); the schemas under
 `src/nic-demo/schema/` are vendored copies of the canonical ones.
 
+### Magento demo content (`magento-demo`)
+
+```bash
+themeseed magento-demo --request <file> --out <theme>/demo --credits <file> [--json]
+```
+
+Writes the demo package a Magento theme ships (`catalog.json` in the `magento-content/1` format
+plus `content-media/`) from a `magento-content-request/1` file that names the departments, how
+many products each leaf category holds, and the products the design itself shows ("seeds"). The
+magento-theme plugin runs this as a subprocess and folds the result into the theme zip.
+
+| Flag               | Meaning                                                                                 |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| `--request <file>` | The content request                                                                     |
+| `--out <dir>`      | The theme's `demo/` folder. Only `catalog.json` and `content-media/` are replaced       |
+| `--credits <file>` | Where image credits are written. Must be outside `--out`, so they never ship in the zip |
+| `--json`           | Print one report object on stdout (`{ ok, written, counts, credits, warnings }`)        |
+
+Exit codes match `nic-demo`: `0` written, `1` refused or failed, `2` usage.
+
+The output is shaped after how Luma — the sample data every Magento theme is designed against —
+actually stores a storefront, rather than after a blog:
+
+- **A nested category tree**, up to four levels, the way Luma's `Men > Tops > Jackets` is. A
+  department with children becomes a landing page as well as a grid (`PRODUCTS_AND_PAGE`).
+- **Attributes, options and swatches** emitted before anything references them, because an
+  attribute's `backend_type` is what decides which EAV value table a product's value lands in.
+  Colour swatches carry Luma's own hexes, so a theme's swatch strip looks like the one it was
+  designed for.
+- **Configurable products**: a parent carrying price and no axis values, and children carrying
+  the axis values, their own price and weight. An axis attribute is always `global` and a
+  `select`, because Magento refuses anything else and the refusal surfaces inside
+  `setup:upgrade` rather than as anything readable.
+- **CMS pages and blocks as plain HTML with Magento directives** — `{{store url="…"}}`,
+  `{{media url="…"}}`, `{{widget …}}` — never Page Builder markup. Across a full Luma database
+  there are 110 `{{store url}}` directives and one stray `data-content-type`. Absolute URLs are
+  rejected: a stock Luma block has `http://localhost:8090/…` baked into it, which is dead on
+  every other host.
+- **Sizes and weights chosen for the topic.** A sofa is "Three-seat" and weighs 34 kg; a shirt
+  is "M" and weighs 0.4 kg. Luma keeps three separate size vocabularies for the same reason.
+
+ThemeSeed never emits what Magento derives: no `url_rewrite` rows, no index tables, no entity
+ids. Everything is addressed by `key`, and the data patch resolves them through Magento's own
+repositories. The contract lives in the mcphub repo
+(`docs/superpowers/specs/2026-10-21-magento-demo-content-contract.md`); the schemas under
+`src/providers/magento/schema/` are vendored copies.
+
+The same operation is the `export_content` MCP tool with `platform: "magento"`.
+
 ## MCP tools
 
 Run `themeseed install` to register the server, or add it by hand:
@@ -460,9 +509,9 @@ unavailable", which looks like a broken theme, so ids are never invented.
 | --------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | **Ghost** | ✅ Supported — Admin API, Lexical, image upload, theme analysis                                                                      |
 | WordPress | ✅ Supported — file export: WXR import file (0.7.0+) and NIC Core demo package / `themeseed nic-demo` (0.8.0+); live seeding planned |
+| Magento   | ✅ Supported — file export: demo catalog package / `themeseed magento-demo` (0.9.0+); live seeding planned                           |
 | Joomla    | 📋 Planned — contributions welcome                                                                                                   |
 | Drupal    | 📋 Planned — contributions welcome                                                                                                   |
-| Magento   | 📋 Planned — contributions welcome                                                                                                   |
 
 Adding one is a self-contained job: implement `CmsProvider`, register it, add tests. Nothing in
 the content generator, image sources, CLI or MCP tools needs to change. See

@@ -20,6 +20,7 @@ import { describeError, ThemeseedError } from '../core/errors.js';
 import { logger } from '../core/logger.js';
 import { exportSite } from '../core/export.js';
 import { exportNicDemo } from '../nic-demo/index.js';
+import { exportMagentoDemo } from '../providers/magento/index.js';
 import { seedSite } from '../core/seed.js';
 import { updatePost } from '../core/update.js';
 import { IMPLEMENTED_PLATFORMS, PLATFORMS, type Platform } from '../core/types.js';
@@ -348,15 +349,20 @@ function registerContentTools(server: McpServer): void {
         'Product seeds (`types.product.seeds[]`) may carry a WooCommerce `product` block ' +
         '(badge, rating, review_count, attributes) and `terms` (product_cat/product_tag slugs): ' +
         'they are kept verbatim and extra products are generated in the same style ' +
-        '(attribute names and shapes, price range, categories, topic-named titles).',
+        '(attribute names and shapes, price range, categories, topic-named titles). ' +
+        'platform "magento" writes the Magento demo package (catalog.json + content-media/) from ' +
+        'a magento-content-request/1 document — nested categories, attribute sets, swatch ' +
+        'attributes, simple and configurable products, CMS pages and blocks in Magento\u2019s own ' +
+        'directive dialect. Pass `request` and `credits`; it ignores topic/count/pages.',
       inputSchema: {
         platform: z
-          .enum(['ghost', 'wordpress', 'nic-demo'])
+          .enum(['ghost', 'wordpress', 'nic-demo', 'magento'])
           .default('ghost')
           .describe(
             'Which CMS the file targets: ghost → content-export.zip, wordpress → ' +
               'demo-content.xml (WXR 1.2), nic-demo → posts.json + content-media/ for a NIC Core ' +
-              "theme (needs `request` and `credits`; outDir is the theme's demo/ folder)."
+              'theme, magento → catalog.json + content-media/ for a Magento theme (both need ' +
+              "`request` and `credits`; outDir is the theme's demo/ folder)."
           ),
         topic: z
           .string()
@@ -418,14 +424,16 @@ function registerContentTools(server: McpServer): void {
           .union([z.string(), z.record(z.string(), z.unknown())])
           .optional()
           .describe(
-            'platform "nic-demo" only: a nic-content-request/1 document, or the path to one. ' +
-              'Seeds are kept verbatim; stock images are refused for themeforest/wordpress.org targets.'
+            'platform "nic-demo" or "magento" only: a nic-content-request/1 or ' +
+              'magento-content-request/1 document, or the path to one. Seeds are kept verbatim; ' +
+              'under nic-demo, stock images are refused for themeforest/wordpress.org targets.'
           ),
         credits: z
           .string()
           .optional()
           .describe(
-            'platform "nic-demo" only: where to write the image credits JSON. Must be outside outDir.'
+            'platform "nic-demo" or "magento" only: where to write the image credits JSON. ' +
+              'Must be outside outDir.'
           ),
       },
     },
@@ -474,6 +482,51 @@ function registerContentTools(server: McpServer): void {
           ...report.warnings.map((w) => `  warning: ${w}`),
         ];
         return text(lines.join('\n'), { ...report, platform: 'nic-demo' });
+      }
+
+      if (args.platform === 'magento') {
+        if (!args.request || !args.credits) {
+          throw new ThemeseedError(
+            'platform "magento" needs both `request` and `credits`',
+            {
+              code: 'MAGENTO_DEMO_USAGE',
+              hint: 'Pass request (a magento-content-request/1 object or file path) and credits (output path).',
+            }
+          );
+        }
+        let report;
+        try {
+          report = await exportMagentoDemo({
+            request: args.request,
+            outDir: args.outDir,
+            creditsPath: args.credits,
+          });
+        } catch (err) {
+          // The default handler keeps only the message; a refusal's fix lives in the hint.
+          if (err instanceof ThemeseedError) {
+            return {
+              content: [{ type: 'text' as const, text: describeError(err) }],
+              isError: true,
+              structuredContent: {
+                ok: false,
+                code: err.code,
+                error: err.message,
+                ...(err.hint ? { hint: err.hint } : {}),
+              },
+            };
+          }
+          throw err;
+        }
+        const counts = Object.entries(report.counts)
+          .filter(([, n]) => n > 0)
+          .map(([type, n]) => `${type} ${n}`)
+          .join(', ');
+        const lines = [
+          `Wrote ${args.outDir}/catalog.json and ${report.written.length - 1} image(s) (${counts})`,
+          `  credits: ${report.credits}`,
+          ...report.warnings.map((w) => `  warning: ${w}`),
+        ];
+        return text(lines.join('\n'), { ...report, platform: 'magento' });
       }
 
       const topic = args.topic?.trim() || (await askForTopic(server));

@@ -26,6 +26,7 @@ import {
 } from './commands/content.js';
 import { imagesCommand } from './commands/images.js';
 import { initCommand } from './commands/init.js';
+import { magentoDemoCommand } from './commands/magento-demo.js';
 import { nicDemoCommand } from './commands/nic-demo.js';
 import { installCommand, printMcpConfig, uninstallCommand } from './commands/install.js';
 import {
@@ -244,6 +245,28 @@ program
     process.exit(informational ? err.exitCode : 2);
   })
   .action((options) => nicDemoCommand(options));
+
+program
+  .command('magento-demo')
+  .description(
+    'Write demo content for a Magento theme (catalog.json + content-media/) from a ' +
+      'magento-content-request/1 file. Exit 0 written, 1 refused/failed, 2 usage'
+  )
+  .option('--request <file>', 'Content request JSON (magento-content-request/1)')
+  .option(
+    '--out <dir>',
+    "The theme's demo/ directory — only catalog.json and content-media/ are replaced"
+  )
+  .option('--credits <file>', 'Where to write image credits (must be outside --out)')
+  .option('--json', 'Print one machine-readable report object on stdout')
+  // Same reservation as nic-demo: commander exits 1 on a bad flag, but this
+  // command's contract keeps 1 for refusals and uses 2 for usage errors.
+  .exitOverride((err) => {
+    const informational =
+      err.code === 'commander.helpDisplayed' || err.code === 'commander.version';
+    process.exit(informational ? err.exitCode : 2);
+  })
+  .action((options) => magentoDemoCommand(options));
 
 program
   .command('update <id> [site]')

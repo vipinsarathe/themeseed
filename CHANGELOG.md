@@ -7,6 +7,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Magento demo content (`themeseed magento-demo`, `export_content` with
+  `platform: "magento"`).** Writes `catalog.json` (`magento-content/1`) plus `content-media/`
+  from a `magento-content-request/1` file, for the magento-theme plugin to fold into a theme
+  package. Contract:
+  `mcphub/docs/superpowers/specs/2026-10-21-magento-demo-content-contract.md`.
+- The output follows how Luma actually stores a storefront rather than how a blog does: a
+  nested category tree, attributes with options and colour swatches emitted before anything
+  references them, attribute sets per department, and configurable products whose parent
+  carries price while each child carries the axis values, price and weight. Axis attributes
+  are always global selects, which is what Magento requires.
+- CMS pages and blocks are plain HTML with Magento directives (`{{store url}}`,
+  `{{media url}}`, `{{widget}}`), never Page Builder markup; absolute URLs to the store's own
+  pages are rejected in favour of `{{store url}}`.
+- Sizes and weights are chosen for the store's topic — a sofa is "Three-seat" at 34 kg, a shirt
+  is "M" at 0.4 kg — rather than one apparel scale applied to every business.
+- Validation before writing: unique keys and SKUs across products and variants, every axis
+  global and a select, distinct variant combinations, resolvable attribute/category/option
+  references, `special_price` below `price`, no `<script>`, and the media limits.
+
 ## [0.8.1] — 2026-10-14
 
 ### Added

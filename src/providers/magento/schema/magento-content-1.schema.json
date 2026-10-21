@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://themeanax.com/schema/magento-content-1.schema.json",
+  "title": "Magento demo content package (magento-content/1)",
+  "description": "Written by `themeseed magento-demo` as demo/catalog.json, read by the magento-theme content module's data patch. Spec: docs/superpowers/specs/2026-10-21-magento-demo-content-contract.md §5. Key order is the order the importer applies them in: attributes, attribute sets, categories, products, CMS.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "generator", "theme", "categories", "products"],
+  "properties": {
+    "format": { "const": "magento-content/1" },
+    "generator": { "type": "string", "minLength": 1 },
+    "theme": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,99}$"
+    },
+    "attributes": {
+      "type": "array",
+      "maxItems": 40,
+      "items": { "$ref": "#/$defs/attribute" }
+    },
+    "attribute_sets": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/attributeSet" }
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/category" }
+    },
+    "products": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200,
+      "items": { "$ref": "#/$defs/product" }
+    },
+    "pages": {
+      "type": "array",
+      "maxItems": 30,
+      "items": { "$ref": "#/$defs/cmsPage" }
+    },
+    "blocks": {
+      "type": "array",
+      "maxItems": 40,
+      "items": { "$ref": "#/$defs/cmsBlock" }
+    }
+  },
+  "$defs": {
+    "key": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,99}$"
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,99}$"
+    },
+    "mediaPath": {
+      "type": "string",
+      "pattern": "^content-media/[a-z0-9][a-z0-9-]*\\.(jpg|png|webp)$",
+      "description": "Package-relative. Remote URLs are invalid in magento-content/1."
+    },
+    "price": {
+      "type": "string",
+      "pattern": "^[0-9]+(\\.[0-9]{1,4})?$",
+      "description": "Decimal string, never a float."
+    },
+    "attributeCode": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{1,30}$"
+    },
+    "attribute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "label", "input"],
+      "properties": {
+        "code": { "$ref": "#/$defs/attributeCode" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "input": { "enum": ["select", "multiselect", "text", "boolean"] },
+        "global": {
+          "type": "boolean",
+          "default": false,
+          "description": "Required true for any attribute used as a configurable axis — Magento refuses a non-global axis."
+        },
+        "swatch": { "enum": ["visual", "text"] },
+        "options": {
+          "type": "array",
+          "maxItems": 60,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["key", "label"],
+            "properties": {
+              "key": { "$ref": "#/$defs/key" },
+              "label": { "type": "string", "minLength": 1, "maxLength": 200 },
+              "swatch": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$",
+                "description": "Hex colour, for a visual swatch option."
+              }
+            }
+          }
+        }
+      }
+    },
+    "attributeSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "name"],
+      "properties": {
+        "key": { "$ref": "#/$defs/key" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/attributeCode" }
+        }
+      }
+    },
+    "category": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "name"],
+      "properties": {
+        "key": { "$ref": "#/$defs/key" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "url_key": { "$ref": "#/$defs/key" },
+        "description": { "type": "string" },
+        "display_mode": {
+          "enum": ["PRODUCTS", "PRODUCTS_AND_PAGE"],
+          "default": "PRODUCTS",
+          "description": "The only two values Luma uses."
+        },
+        "image": { "$ref": "#/$defs/mediaPath" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/category" },
+          "description": "Arbitrary depth. The importer derives path, level and url_path."
+        }
+      }
+    },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "sku", "type", "name", "price"],
+      "properties": {
+        "key": { "$ref": "#/$defs/key" },
+        "sku": {
+          "type": "string",
+          "pattern": "^[A-Z0-9-]{1,40}$",
+          "description": "Unique across products AND variants."
+        },
+        "type": { "enum": ["simple", "configurable"] },
+        "attribute_set": { "$ref": "#/$defs/key" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "url_key": { "$ref": "#/$defs/key" },
+        "price": { "$ref": "#/$defs/price" },
+        "special_price": {
+          "$ref": "#/$defs/price",
+          "description": "Must be strictly less than price."
+        },
+        "weight": { "$ref": "#/$defs/price" },
+        "description": { "type": "string" },
+        "short_description": { "type": "string" },
+        "categories": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/key" }
+        },
+        "image": { "$ref": "#/$defs/mediaPath" },
+        "gallery": {
+          "type": "array",
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/mediaPath" }
+        },
+        "attributes": {
+          "type": "object",
+          "description": "Non-axis attribute values, keyed by attribute code. A multiselect takes an array of option keys.",
+          "additionalProperties": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } }
+            ]
+          }
+        },
+        "axes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/attributeCode" },
+          "description": "Required for configurable, forbidden for simple."
+        },
+        "variants": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 60,
+          "items": { "$ref": "#/$defs/variant" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "configurable" } } },
+          "then": { "required": ["axes", "variants"] },
+          "else": {
+            "properties": {
+              "axes": false,
+              "variants": false
+            }
+          }
+        }
+      ]
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sku", "price", "values"],
+      "properties": {
+        "sku": { "type": "string", "pattern": "^[A-Z0-9-]{1,40}$" },
+        "price": { "$ref": "#/$defs/price" },
+        "weight": { "$ref": "#/$defs/price" },
+        "image": { "$ref": "#/$defs/mediaPath" },
+        "values": {
+          "type": "object",
+          "description": "One value per axis, keyed by attribute code, valued by option key.",
+          "minProperties": 1,
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "cmsPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "title", "content"],
+      "properties": {
+        "key": { "$ref": "#/$defs/identifier" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "content_heading": { "type": "string", "maxLength": 200 },
+        "page_layout": {
+          "enum": ["1column", "2columns-right"],
+          "default": "1column"
+        },
+        "content": {
+          "type": "string",
+          "description": "Escaped HTML with Magento directives: {{store url=\"…\"}}, {{media url=\"…\"}}, {{widget …}}. Never Page Builder markup, never an absolute URL to the store's own pages, never <script>."
+        },
+        "meta_title": { "type": "string" },
+        "meta_description": { "type": "string" }
+      }
+    },
+    "cmsBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "title", "content"],
+      "properties": {
+        "key": { "$ref": "#/$defs/identifier" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "content": { "type": "string" }
+      }
+    }
+  }
+}
