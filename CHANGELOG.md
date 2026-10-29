@@ -7,6 +7,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.9.1] — 2026-10-29
+
+### Fixed
+
+- The CLI's help and the MCP tool description said "Ghost is supported today. WordPress,
+  Joomla, Drupal and Magento are planned". WordPress has been supported since 0.8.0 and
+  Magento since 0.9.0, as file exports rather than live seeding, and the README's table says
+  so. An assistant read the stale line, concluded `themeseed nic-demo` would not work for a
+  WordPress theme, and skipped the step. Both now describe what each platform does: Ghost
+  over its Admin API, WordPress and Magento as files that `nic-demo` and `magento-demo`
+  write without connecting to a site.
+
 ## [0.9.0] — 2026-10-21
 
 ### Added
