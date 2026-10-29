@@ -42,7 +42,9 @@ export function createThemeseedServer(version: string): McpServer {
         'is configured; with no key set, posts publish without them. Everything it creates is ' +
         'tagged #themeseed and can be removed with wipe_seeded. To fix a post that already ' +
         'exists — a missing hero, an unwanted one — use update_post rather than wiping and ' +
-        'seeding again. Ghost is supported today.',
+        'seeding again. These tools seed a live site, which today means Ghost; WordPress and ' +
+        'Magento are seeded instead as files you import, by the `themeseed nic-demo` and ' +
+        '`themeseed magento-demo` commands, which need no site to connect to.',
     }
   );
 

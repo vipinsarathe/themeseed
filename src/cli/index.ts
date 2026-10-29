@@ -48,8 +48,9 @@ program
   .description(
     'Seed realistic demo content into a CMS so you can preview a theme with real-looking\n' +
       'articles, images, galleries and video — instead of an empty install.\n\n' +
-      'Ghost is supported today. WordPress, Joomla, Drupal and Magento are planned;\n' +
-      'see CONTRIBUTING.md to add one.'
+      'Ghost is seeded live over its Admin API. WordPress and Magento are seeded as files\n' +
+      'you import — `nic-demo` and `magento-demo` write them and need no site to connect\n' +
+      'to. Joomla and Drupal are planned; see CONTRIBUTING.md to add one.'
   )
   .version(await readVersion(), '-v, --version', 'Print the installed version')
   .helpOption('-h, --help', 'Show this help')
