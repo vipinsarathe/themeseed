@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import type { ImageRef, ImageRequest } from '../../src/core/types.js';
 import {
+  selectStockProvider,
   selectStockProviders,
   StockImageSource,
   type StockProvider,
@@ -146,5 +147,42 @@ describe('StockImageSource fallback', () => {
 
     await expect(source.fetch(REQUEST, 1)).rejects.toThrow(/rate limit reached/);
     expect(calls).toEqual(['unsplash', 'pexels']);
+  });
+});
+
+describe('Unsplash query parameters', () => {
+  /** Captures the URL the adapter builds without touching the network. */
+  function capture(): { urls: URL[]; fetchImpl: typeof fetch } {
+    const urls: URL[] = [];
+    const fetchImpl = (async (input: unknown) => {
+      urls.push(new URL(String(input)));
+      return new Response(JSON.stringify({ results: [] }), { status: 200 });
+    }) as unknown as typeof fetch;
+    return { urls, fetchImpl };
+  }
+
+  // Unsplash's enum is landscape | portrait | *squarish*. Sending the neutral
+  // model's "square" is a 400, which made magento-demo (a square catalog grid)
+  // unable to use Unsplash at all.
+  it('sends orientation=squarish for a square request', async () => {
+    const { urls, fetchImpl } = capture();
+    const provider = selectStockProvider({ unsplashAccessKey: 'k', fetchImpl });
+
+    await provider.search({ query: 'chair', orientation: 'square' }, 1);
+
+    expect(urls[0]!.searchParams.get('orientation')).toBe('squarish');
+  });
+
+  it('passes landscape and portrait through unchanged', async () => {
+    const { urls, fetchImpl } = capture();
+    const provider = selectStockProvider({ unsplashAccessKey: 'k', fetchImpl });
+
+    await provider.search({ query: 'chair', orientation: 'landscape' }, 1);
+    await provider.search({ query: 'chair', orientation: 'portrait' }, 1);
+
+    expect(urls.map((url) => url.searchParams.get('orientation'))).toEqual([
+      'landscape',
+      'portrait',
+    ]);
   });
 });

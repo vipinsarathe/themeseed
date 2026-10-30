@@ -217,7 +217,15 @@ class UnsplashProvider implements StockProvider {
     const url = new URL('https://api.unsplash.com/search/photos');
     url.searchParams.set('query', request.query);
     url.searchParams.set('per_page', String(Math.min(30, Math.max(count, 1))));
-    url.searchParams.set('orientation', orientationFor(request));
+    // Unsplash's enum is landscape | portrait | *squarish*; the neutral
+    // model's "square" is rejected with a 400, not ignored. Pexels, two
+    // adapters down, does take "square" — hence the translation here rather
+    // than in `orientationFor`.
+    const orientation = orientationFor(request);
+    url.searchParams.set(
+      'orientation',
+      orientation === 'square' ? 'squarish' : orientation
+    );
     url.searchParams.set('content_filter', 'high');
 
     const response = await this.doFetch(url, {
