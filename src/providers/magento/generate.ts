@@ -17,6 +17,9 @@ import {
   type ContentEngine,
   hashString,
 } from '../../content/engine.js';
+import { ThemeseedError } from '../../core/errors.js';
+import { logger } from '../../core/logger.js';
+import type { ImageRef } from '../../core/types.js';
 import { seededRandom } from '../../images/png.js';
 import type { ImageSource } from '../../images/source.js';
 import { MediaCollector } from '../../nic-demo/media.js';
@@ -276,6 +279,26 @@ function categoryMenu(title: string, categories: MagentoCategory[]): string {
 // Helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * A catalog query, then progressively broader fallbacks.
+ *
+ * Luma-style names put the distinctive part first — "Chaz Kangeroo Hoodie" —
+ * and no stock library has a photo of Chaz. Dropping leading words leaves the
+ * noun that does match. Three attempts: the query as asked, without its first
+ * word, and its last two words — the topic ("mid-century furniture") rather
+ * than the product. Two words is the floor; a lone "detail" or "fitness"
+ * returns a photo of nothing in particular.
+ */
+export function queryTails(query: string): string[] {
+  const words = query.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return [];
+  const floor = Math.min(2, words.length);
+  const candidates = [words, words.slice(1), words.slice(-2)]
+    .filter((tail) => tail.length >= floor)
+    .map((tail) => tail.join(' '));
+  return [...new Set(candidates)];
+}
+
 async function addImage(
   media: MediaCollector,
   source: ImageSource,
@@ -283,23 +306,37 @@ async function addImage(
   baseName: string,
   role: 'feature' | 'gallery'
 ): Promise<string | undefined> {
-  const refs = await source.fetch(
-    {
-      query,
-      role,
-      // Magento's catalog grid is square by convention (`etc/view.xml` ships
-      // 1:1 for the product grid), and a landscape photo in a square tile is
-      // cropped by the theme rather than by us.
-      orientation: 'square',
-      aspectRatio: 1,
-      minWidth: 800,
-    },
-    1
-  );
-  // A source may return fewer than asked for; a missing image is never fatal.
-  const ref = refs[0];
-  if (!ref) return undefined;
-  return media.add(ref, baseName);
+  for (const candidate of queryTails(query)) {
+    let refs: ImageRef[];
+    try {
+      refs = await source.fetch(
+        {
+          query: candidate,
+          role,
+          // Magento's catalog grid is square by convention (`etc/view.xml`
+          // ships 1:1 for the product grid), and a landscape photo in a square
+          // tile is cropped by the theme rather than by us.
+          orientation: 'square',
+          aspectRatio: 1,
+          minWidth: 800,
+        },
+        1
+      );
+    } catch (err) {
+      // An image source throws when it finds nothing, and a free stock tier
+      // runs out partway through a run. Neither is a reason to lose the other
+      // forty products: broaden the query, or give up on this one image. Only
+      // a genuine miss is worth a retry — a 403 would spend quota three times.
+      logger.debug(`image search for "${candidate}" failed:`, err);
+      if (err instanceof ThemeseedError && err.code === 'STOCK_NO_RESULTS') continue;
+      return undefined;
+    }
+
+    // A source may return fewer than asked for; a missing image is never fatal.
+    const ref = refs[0];
+    if (ref) return media.add(ref, baseName);
+  }
+  return undefined;
 }
 
 function flatten(categories: MagentoCategory[]): MagentoCategory[] {

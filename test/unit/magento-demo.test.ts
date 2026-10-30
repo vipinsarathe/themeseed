@@ -8,6 +8,14 @@ import {
   exportMagentoDemo,
   MagentoDemoUsageError,
 } from '../../src/providers/magento/index.js';
+import {
+  generateMagentoContent,
+  queryTails,
+} from '../../src/providers/magento/generate.js';
+import { ThemeseedError } from '../../src/core/errors.js';
+import { encodePng } from '../../src/images/png.js';
+import type { ImageSource } from '../../src/images/source.js';
+import { MediaCollector } from '../../src/nic-demo/media.js';
 import { validateMagentoContent } from '../../src/providers/magento/validate.js';
 import {
   blocksToMagentoHtml,
@@ -64,9 +72,7 @@ function request(overrides: Partial<MagentoContentRequest> = {}): MagentoContent
   };
 }
 
-async function run(
-  req: MagentoContentRequest = request()
-): Promise<{
+async function run(req: MagentoContentRequest = request()): Promise<{
   content: MagentoContent;
   outDir: string;
   report: Awaited<ReturnType<typeof exportMagentoDemo>>;
@@ -672,5 +678,116 @@ describe('magento catalog planning', () => {
 
     expect(weight('mid-century furniture and home decor')).toBeGreaterThan(8);
     expect(weight('handmade jewellery and rings')).toBeLessThan(1);
+  });
+});
+
+describe('product images', () => {
+  const png = encodePng(8, 8, () => ({ r: 9, g: 9, b: 9 }));
+
+  function collector(): MediaCollector {
+    return new MediaCollector('Aurelia Living', async () => png);
+  }
+
+  /** Records every query, answers only the ones `hits` matches. */
+  function stubSource(hits: (query: string) => boolean): {
+    queries: string[];
+    source: ImageSource;
+  } {
+    const queries: string[] = [];
+    const source: ImageSource = {
+      kind: 'stock',
+      async isAvailable() {
+        return true;
+      },
+      async unavailableReason() {
+        return '';
+      },
+      async fetch(request) {
+        queries.push(request.query);
+        if (!hits(request.query)) {
+          throw new ThemeseedError('Stock provider "unsplash" returned no images', {
+            code: 'STOCK_NO_RESULTS',
+          });
+        }
+        return [
+          {
+            kind: 'url' as const,
+            location: `https://cdn.test/${queries.length}.png`,
+            source: 'stock' as const,
+          },
+        ];
+      },
+    };
+    return { queries, source };
+  }
+
+  const generate = (source: ImageSource, media = collector()) =>
+    generateMagentoContent({
+      request: request({ images: { source: 'stock' } }),
+      media,
+      imageSource: source,
+      generator: 'test',
+    });
+
+  // A long product name finds nothing in a stock library; dropping the
+  // distinctive leading words leaves the noun that does match.
+  it('retries a zero-result query on shorter tails', async () => {
+    const { queries, source } = stubSource((q) => q.split(/\s+/).length <= 2);
+
+    const { content } = await generate(source);
+
+    expect(queries.some((query) => query.split(/\s+/).length > 2)).toBe(true);
+    expect(queries.some((query) => query.split(/\s+/).length <= 2)).toBe(true);
+    expect(content.products.every((product) => product.image)).toBe(true);
+  });
+
+  // The one that mattered: before this, the first product whose name found
+  // nothing threw, and the whole export died with it.
+  it('finishes the export when no query ever matches', async () => {
+    const { source } = stubSource(() => false);
+
+    const { content } = await generate(source);
+
+    expect(content.products.length).toBeGreaterThan(0);
+    expect(content.products.some((product) => product.image)).toBe(false);
+  });
+
+  it('gives up on an image rather than burning quota on broader queries', async () => {
+    const queries: string[] = [];
+    const source: ImageSource = {
+      kind: 'stock',
+      async isAvailable() {
+        return true;
+      },
+      async unavailableReason() {
+        return '';
+      },
+      async fetch(request) {
+        queries.push(request.query);
+        throw new ThemeseedError('Unsplash rate limit reached', {
+          code: 'STOCK_SEARCH_FAILED',
+        });
+      },
+    };
+
+    const { content } = await generate(source);
+
+    // One attempt per image, not one per tail.
+    expect(new Set(queries).size).toBe(queries.length);
+    expect(content.products.some((product) => product.image)).toBe(false);
+  });
+});
+
+describe('queryTails', () => {
+  it('keeps the tail, never going below two words', () => {
+    expect(queryTails('Chaz Kangeroo Hoodie fitness')).toEqual([
+      'Chaz Kangeroo Hoodie fitness',
+      'Kangeroo Hoodie fitness',
+      'Hoodie fitness',
+    ]);
+  });
+
+  it('returns a one-word query once, with nothing to broaden to', () => {
+    expect(queryTails('hoodie')).toEqual(['hoodie']);
   });
 });
