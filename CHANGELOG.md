@@ -7,6 +7,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.9.2] — 2026-10-30
+
+### Fixed
+
+- **Unsplash could never serve a Magento demo.** Its search API takes
+  `landscape | portrait | squarish` and answers anything else with a 400, while themeseed
+  sent the neutral model's `square` — which is what `magento-demo` asks for on every image,
+  the catalog grid being 1:1 by Magento convention. The Unsplash adapter now translates;
+  Pexels, which does take `square`, is unchanged.
+- **One awkward product name took the whole Magento export down.** A stock search that finds
+  nothing throws, and `addImage` did not catch it, so the first product no stock library had
+  a photo of lost the forty finished products behind it. A miss is now retried on broader
+  queries — the query as asked, then without its leading word, then its last two words,
+  since Luma-style names put the distinctive part first — and any other failure skips that
+  one image rather than ending the run. A rate limit is not retried: broadening after a 403
+  would spend an exhausted quota three times over.
+
 ## [0.9.1] — 2026-10-29
 
 ### Fixed
