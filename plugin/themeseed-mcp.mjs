@@ -34170,7 +34170,11 @@ var UnsplashProvider = class {
     const url2 = new URL("https://api.unsplash.com/search/photos");
     url2.searchParams.set("query", request.query);
     url2.searchParams.set("per_page", String(Math.min(30, Math.max(count, 1))));
-    url2.searchParams.set("orientation", orientationFor(request));
+    const orientation = orientationFor(request);
+    url2.searchParams.set(
+      "orientation",
+      orientation === "square" ? "squarish" : orientation
+    );
     url2.searchParams.set("content_filter", "high");
     const response = await this.doFetch(url2, {
       headers: {
@@ -38287,23 +38291,39 @@ ${items}
 </div>
 `;
 }
+function queryTails(query) {
+  const words = query.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return [];
+  const floor = Math.min(2, words.length);
+  const candidates = [words, words.slice(1), words.slice(-2)].filter((tail) => tail.length >= floor).map((tail) => tail.join(" "));
+  return [...new Set(candidates)];
+}
 async function addImage(media, source, query, baseName, role) {
-  const refs = await source.fetch(
-    {
-      query,
-      role,
-      // Magento's catalog grid is square by convention (`etc/view.xml` ships
-      // 1:1 for the product grid), and a landscape photo in a square tile is
-      // cropped by the theme rather than by us.
-      orientation: "square",
-      aspectRatio: 1,
-      minWidth: 800
-    },
-    1
-  );
-  const ref = refs[0];
-  if (!ref) return void 0;
-  return media.add(ref, baseName);
+  for (const candidate of queryTails(query)) {
+    let refs;
+    try {
+      refs = await source.fetch(
+        {
+          query: candidate,
+          role,
+          // Magento's catalog grid is square by convention (`etc/view.xml`
+          // ships 1:1 for the product grid), and a landscape photo in a square
+          // tile is cropped by the theme rather than by us.
+          orientation: "square",
+          aspectRatio: 1,
+          minWidth: 800
+        },
+        1
+      );
+    } catch (err) {
+      logger.debug(`image search for "${candidate}" failed:`, err);
+      if (err instanceof ThemeseedError && err.code === "STOCK_NO_RESULTS") continue;
+      return void 0;
+    }
+    const ref = refs[0];
+    if (ref) return media.add(ref, baseName);
+  }
+  return void 0;
 }
 function flatten(categories) {
   const out = [];
