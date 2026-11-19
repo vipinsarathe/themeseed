@@ -36668,9 +36668,9 @@ async function resolveAuto(target, options, env, warnings) {
     if (hasStockKey(env)) return createImageSource("stock", options);
   }
   warnings.push(
-    `images.source "auto" found no usable source for target "${target}", so the demo has no images. Set an AI key (OPENAI_API_KEY, XAI_API_KEY, GOOGLE_API_KEY, FAL_KEY), point THEMESEED_LOCAL_IMAGE_DIR at your own images, or set images.source to "ai" for placeholders.`
+    `images.source "auto" found no photo source for target "${target}", so the demo uses procedural placeholder art. For real photography set an AI key (OPENAI_API_KEY, XAI_API_KEY, GOOGLE_API_KEY, FAL_KEY) or point THEMESEED_LOCAL_IMAGE_DIR at your own images, then run the seed again.`
   );
-  return createImageSource("none");
+  return createImageSource("ai", options);
 }
 async function defaultFetchBytes2(ref) {
   if (ref.kind === "file") return new Uint8Array(await fs8.readFile(ref.location));
@@ -37746,42 +37746,111 @@ var COLOURS = [
   { key: "orange", label: "Orange", swatch: "#eb6703" },
   { key: "red", label: "Red", swatch: "#d8102a" }
 ];
-var SIZE_SCALES = [
+var TOPIC_PROFILES = [
   {
     match: /\b(furniture|sofa|seating|interior|home decor|homeware|decor|lighting|lamp)\b/i,
-    options: [
+    sizeLabel: "Size",
+    sizes: [
       { key: "two-seat", label: "Two-seat" },
       { key: "three-seat", label: "Three-seat" },
       { key: "compact", label: "Compact" },
       { key: "wide", label: "Wide" }
+    ],
+    facets: [
+      {
+        code: "material",
+        label: "Material",
+        input: "multiselect",
+        values: ["Oak", "Walnut", "Teak", "Linen", "Leather", "Steel", "Glass", "Marble"]
+      },
+      {
+        code: "room",
+        label: "Room",
+        input: "select",
+        values: ["Living room", "Dining room", "Bedroom", "Study", "Outdoor"]
+      }
     ]
   },
   {
     match: /\b(coffee|tea|food|grocer\w*|spice|snack|bakery|roaster\w*)\b/i,
-    options: [
+    sizeLabel: "Pack size",
+    sizes: [
       { key: "250g", label: "250 g" },
       { key: "500g", label: "500 g" },
       { key: "1kg", label: "1 kg" }
+    ],
+    facets: [
+      {
+        code: "roast_level",
+        label: "Roast level",
+        input: "select",
+        values: ["Light", "Medium", "Medium-dark", "Dark"]
+      },
+      {
+        code: "origin",
+        label: "Origin",
+        input: "select",
+        values: ["Ethiopia", "Colombia", "Brazil", "Guatemala", "Kenya", "Sumatra"]
+      },
+      {
+        code: "grind",
+        label: "Grind",
+        input: "multiselect",
+        values: ["Whole bean", "Espresso", "Filter", "French press", "Moka pot"]
+      }
     ]
   },
   {
     match: /\b(jewel\w*|ring|watch|accessor\w*)\b/i,
-    options: [
+    sizeLabel: "Length",
+    sizes: [
       { key: "16cm", label: "16 cm" },
       { key: "18cm", label: "18 cm" },
       { key: "20cm", label: "20 cm" }
+    ],
+    facets: [
+      {
+        code: "material",
+        label: "Material",
+        input: "multiselect",
+        values: ["Sterling silver", "18ct gold", "Rose gold", "Platinum", "Brass"]
+      },
+      {
+        code: "gemstone",
+        label: "Gemstone",
+        input: "select",
+        values: ["None", "Diamond", "Sapphire", "Emerald", "Opal"]
+      }
+    ]
+  },
+  // Apparel, and the fallback for a topic that names nothing else.
+  {
+    sizeLabel: "Size",
+    sizes: [
+      { key: "xs", label: "XS" },
+      { key: "s", label: "S" },
+      { key: "m", label: "M" },
+      { key: "l", label: "L" },
+      { key: "xl", label: "XL" }
+    ],
+    facets: [
+      {
+        code: "material",
+        label: "Material",
+        input: "multiselect",
+        values: ["Cotton", "Linen", "Wool", "Leather", "Denim", "Silk"]
+      },
+      {
+        code: "style",
+        label: "Style",
+        input: "select",
+        values: ["Casual", "Formal", "Sport", "Outdoor"]
+      }
     ]
   }
 ];
-var APPAREL_SIZES = [
-  { key: "xs", label: "XS" },
-  { key: "s", label: "S" },
-  { key: "m", label: "M" },
-  { key: "l", label: "L" },
-  { key: "xl", label: "XL" }
-];
-function sizesFor(topic) {
-  return SIZE_SCALES.find((scale) => scale.match.test(topic))?.options ?? APPAREL_SIZES;
+function profileFor(topic) {
+  return TOPIC_PROFILES.find((profile) => !profile.match || profile.match.test(topic));
 }
 function weightRangeFor(topic) {
   if (/\b(furniture|sofa|seating|table|interior|home decor|homeware)\b/i.test(topic))
@@ -37790,16 +37859,6 @@ function weightRangeFor(topic) {
   if (/\b(jewel\w*|ring|watch|accessor\w*)\b/i.test(topic)) return [0.05, 0.5];
   return [0.2, 3];
 }
-var MATERIALS = [
-  "Oak",
-  "Walnut",
-  "Linen",
-  "Cotton",
-  "Leather",
-  "Steel",
-  "Glass",
-  "Wool"
-];
 function planCatalog(request) {
   const warnings = [];
   const random = seededRandom(hashString(`${request.theme}|${request.store.topic}`));
@@ -37845,16 +37904,17 @@ function planCategories(request) {
 }
 function planAttributes(request) {
   const ratio = request.catalog.configurable_ratio ?? DEFAULT_CONFIGURABLE_RATIO;
+  const profile = profileFor(request.store.topic);
   const attributes = [];
   if (ratio > 0) {
     const axes = request.catalog.axes ?? [
       { code: "color", label: "Colour", swatch: "visual" },
-      { code: "size", label: "Size", swatch: "text" }
+      { code: "size", label: profile.sizeLabel, swatch: "text" }
     ];
-    const sizes = sizesFor(request.store.topic);
     for (const axis of axes) {
       const visual = axis.swatch === "visual";
-      const options = (axis.code === "size" ? sizes : COLOURS).map((option) => ({
+      const source = axis.code === "size" ? profile.sizes : COLOURS;
+      const options = source.map((option) => ({
         key: option.key,
         label: option.label,
         ...visual && option.swatch ? { swatch: option.swatch } : {}
@@ -37866,20 +37926,28 @@ function planAttributes(request) {
         // Both are required by Magento for a configurable axis; see the file
         // docblock. Not a default a caller may override.
         global: true,
+        ...FILTERABLE,
         ...axis.swatch ? { swatch: axis.swatch } : {},
         options
       });
     }
   }
-  attributes.push({
-    code: "material",
-    label: "Material",
-    input: "multiselect",
-    global: false,
-    options: MATERIALS.map((name) => ({ key: slugify2(name), label: name }))
-  });
+  for (const facet of profile.facets) {
+    attributes.push({
+      code: facet.code,
+      label: facet.label,
+      input: facet.input,
+      global: false,
+      ...FILTERABLE,
+      options: facet.values.map((name) => ({ key: slugify2(name), label: name }))
+    });
+  }
   return attributes;
 }
+var FILTERABLE = {
+  is_filterable: 1,
+  is_filterable_in_search: 1
+};
 function planAttributeSets(request, attributes) {
   const codes = attributes.map((attribute) => attribute.code);
   return request.catalog.departments.map((department) => ({
@@ -37894,7 +37962,9 @@ function planProducts(request, leaves, attributes, random, warnings) {
   const range = request.store.price_range ?? DEFAULT_PRICE_RANGE;
   const seeds = request.catalog.seeds ?? [];
   const axisCodes = attributes.filter((a) => a.global && a.input === "select").map((a) => a.code);
-  const material = attributes.find((a) => a.code === "material");
+  const facets = attributes.filter(
+    (a) => !axisCodes.includes(a.code) && (a.options?.length ?? 0) > 0
+  );
   const weight = weightRangeFor(request.store.topic);
   const skuPrefix = skuStem(request.store.name);
   const usedKeys = /* @__PURE__ */ new Set();
@@ -37913,7 +37983,7 @@ function planProducts(request, leaves, attributes, random, warnings) {
         sku: seed.sku ?? uniqueSku(skuPrefix, seed.name, usedSkus),
         axisCodes,
         attributes,
-        material,
+        facets,
         random,
         weight,
         ...seed.description ? { description: seed.description } : {},
@@ -37940,7 +38010,7 @@ function planProducts(request, leaves, attributes, random, warnings) {
           sku: uniqueSku(skuPrefix, name, usedSkus),
           axisCodes,
           attributes,
-          material,
+          facets,
           random,
           weight
         })
@@ -37967,12 +38037,14 @@ function buildProduct2(args) {
     ...args.description ? { description: args.description } : {},
     ...args.shortDescription ? { short_description: args.shortDescription } : {}
   };
-  if (args.material?.options?.length) {
-    const chosen = pickSome(args.random, args.material.options, 1, 2).map(
-      (option) => option.key
-    );
-    product.attributes = { material: chosen };
+  const values = {};
+  for (const facet of args.facets) {
+    const options = facet.options ?? [];
+    if (options.length === 0) continue;
+    const chosen = facet.input === "multiselect" ? pickSome(args.random, options, 1, 2).map((option) => option.key) : pickSome(args.random, options, 1, 1)[0].key;
+    values[facet.code] = chosen;
   }
+  if (Object.keys(values).length > 0) product.attributes = values;
   if (args.type === "configurable" && args.axisCodes.length > 0) {
     product.axes = args.axisCodes;
     product.variants = buildVariants(args);
@@ -38462,6 +38534,16 @@ var magento_content_1_schema_default = {
           type: "boolean",
           default: false,
           description: "Required true for any attribute used as a configurable axis \u2014 Magento refuses a non-global axis."
+        },
+        is_filterable: {
+          enum: [0, 1, 2],
+          default: 0,
+          description: "catalog_eav_attribute.is_filterable: 0 none, 1 filterable with results, 2 always filterable. Magento builds no layered-navigation facet for an attribute left at 0, so a category page shows only Price. Generated attributes are written as 1."
+        },
+        is_filterable_in_search: {
+          enum: [0, 1],
+          default: 0,
+          description: "catalog_eav_attribute.is_filterable_in_search, for the search results page."
         },
         swatch: { enum: ["visual", "text"] },
         options: {

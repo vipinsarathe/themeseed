@@ -626,8 +626,62 @@ describe('magento catalog planning', () => {
       request({ catalog: { ...request().catalog, configurable_ratio: 0 } })
     );
 
-    expect(plan.attributes.map((a) => a.code)).toEqual(['material']);
+    expect(plan.attributes.map((a) => a.code)).toEqual(['material', 'room']);
     expect(plan.products.every((p) => p.type === 'simple')).toBe(true);
+  });
+
+  it('marks every generated attribute filterable', () => {
+    // Magento's default is 0, which builds no facet at all: the theme's filter
+    // sidebar then renders correctly with only Price in it.
+    const plan = planCatalog(request());
+    expect(plan.attributes.length).toBeGreaterThan(0);
+    for (const attribute of plan.attributes) {
+      expect(attribute.is_filterable).toBe(1);
+      expect(attribute.is_filterable_in_search).toBe(1);
+    }
+  });
+
+  it('gives every product a value for every non-axis facet', () => {
+    // An attribute with no values behind it filters to an empty facet.
+    const plan = planCatalog(request());
+    const axisCodes = new Set(plan.attributes.filter((a) => a.global).map((a) => a.code));
+    const facets = plan.attributes.filter((a) => !axisCodes.has(a.code));
+    expect(facets.length).toBeGreaterThan(0);
+    for (const product of plan.products) {
+      for (const facet of facets) {
+        const value = product.attributes?.[facet.code];
+        if (facet.input === 'multiselect') {
+          expect(Array.isArray(value) && value.length > 0).toBe(true);
+        } else {
+          expect(typeof value).toBe('string');
+        }
+      }
+    }
+  });
+
+  it('filters a coffee shop by roast and a wardrobe by fabric', () => {
+    // Luma's own vocabulary on every topic is how a coffee shop ended up
+    // offering Cotton, Leather and Wool.
+    const facetCodes = (topic: string): string[] =>
+      planCatalog(request({ store: { name: 'S', topic } }))
+        .attributes.filter((a) => !a.global)
+        .map((a) => a.code);
+    expect(facetCodes('single origin coffee roastery')).toEqual([
+      'roast_level',
+      'origin',
+      'grind',
+    ]);
+    expect(facetCodes('performance activewear')).toEqual(['material', 'style']);
+    expect(facetCodes('mid-century furniture and home decor')).toContain('room');
+  });
+
+  it('calls the size axis "Pack size" on a bag of coffee', () => {
+    const label = (topic: string): string =>
+      planCatalog(request({ store: { name: 'S', topic } })).attributes.find(
+        (a) => a.code === 'size'
+      )!.label;
+    expect(label('single origin coffee roastery')).toBe('Pack size');
+    expect(label('performance activewear')).toBe('Size');
   });
 
   it('names products after the thing the category holds', () => {

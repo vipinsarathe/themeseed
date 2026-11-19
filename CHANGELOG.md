@@ -7,6 +7,33 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.10.0] — 2026-11-19
+
+### Fixed
+
+- **A generated Magento catalog produced zero working layered-navigation filters.** Magento
+  builds no facet for an attribute whose `is_filterable` is 0, which is its default, and
+  `catalog.json` had no way to say otherwise: on a live install 25 of the 26 filters Magento
+  built for a category page had no options, leaving Price as the only one that worked. The
+  `magento-content/1` attribute now carries `is_filterable` (0 | 1 | 2) and
+  `is_filterable_in_search` (0 | 1), and every generated attribute is written as 1. The
+  importing data patch must write both to `catalog_eav_attribute` for this to take effect.
+- **Non-axis attributes had values on only some products.** Every product now carries a value
+  for every non-axis facet, so no facet can filter to an empty list.
+
+### Changed
+
+- **Magento demo facets follow the trade rather than Luma's.** The non-axis attributes used to
+  be one hard-coded `material` list, so a coffee roastery's sidebar offered Cotton, Leather and
+  Wool. Topics now bring their own: a roastery filters by Roast level, Origin and Grind, a
+  furniture store by Material and Room, jewellery by Material and Gemstone, and everything else
+  by Material and Style. The size axis is labelled for the topic too — "Pack size" on a bag of
+  coffee, "Length" on a bracelet.
+- **NIC demo fallback for missing image sources is now procedural art, not no images.** When
+  `images.source` is `auto` and no photo key is configured, `nic-demo` previously shipped demos
+  with no imagery. It now renders procedurally generated placeholder artwork locally — no key,
+  no licence, safe in a GPL product. An explicit `none` still ships no images.
+
 ## [0.9.2] — 2026-10-30
 
 ### Fixed

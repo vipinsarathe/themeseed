@@ -110,12 +110,16 @@ async function resolveAuto(
     if (hasStockKey(env)) return createImageSource('stock', options);
   }
 
+  // Procedural placeholders: no key, no licence, generated locally, so they are safe in a
+  // GPL product. A demo with no images at all imports to grey boxes — the first screen a
+  // buyer sees — and "no images" is never a better answer than placeholder art.
   warnings.push(
-    `images.source "auto" found no usable source for target "${target}", so the demo has no images. ` +
-      'Set an AI key (OPENAI_API_KEY, XAI_API_KEY, GOOGLE_API_KEY, FAL_KEY), ' +
-      'point THEMESEED_LOCAL_IMAGE_DIR at your own images, or set images.source to "ai" for placeholders.'
+    `images.source "auto" found no photo source for target "${target}", so the demo uses ` +
+      'procedural placeholder art. For real photography set an AI key (OPENAI_API_KEY, ' +
+      'XAI_API_KEY, GOOGLE_API_KEY, FAL_KEY) or point THEMESEED_LOCAL_IMAGE_DIR at your own ' +
+      'images, then run the seed again.'
   );
-  return createImageSource('none');
+  return createImageSource('ai', options);
 }
 
 // ---------------------------------------------------------------------------

@@ -85,51 +85,138 @@ const COLOURS: ReadonlyArray<{ key: string; label: string; swatch: string }> = [
  * gear "55 cm"/"6 foot"), stored as different option-id ranges on one
  * attribute.
  */
-const SIZE_SCALES: ReadonlyArray<{
-  match: RegExp;
-  options: ReadonlyArray<{ key: string; label: string }>;
-}> = [
+interface TopicProfile {
+  match?: RegExp;
+  /**
+   * What the size axis is called here. "Size: 250 g" reads as a mistake on a
+   * bag of coffee; the scale was already right, only the word was borrowed
+   * from apparel.
+   */
+  sizeLabel: string;
+  sizes: ReadonlyArray<{ key: string; label: string }>;
+  /**
+   * Non-axis attributes this trade actually filters on. These are what fills
+   * layered navigation beyond colour and size, so they are the difference
+   * between a demo storefront that looks shoppable and one that does not —
+   * and reusing Luma's own vocabulary everywhere is how a coffee shop ended up
+   * offering Cotton, Leather and Wool.
+   */
+  facets: ReadonlyArray<{
+    code: string;
+    label: string;
+    input: 'select' | 'multiselect';
+    values: readonly string[];
+  }>;
+}
+
+const TOPIC_PROFILES: readonly TopicProfile[] = [
   {
     match:
       /\b(furniture|sofa|seating|interior|home decor|homeware|decor|lighting|lamp)\b/i,
-    options: [
+    sizeLabel: 'Size',
+    sizes: [
       { key: 'two-seat', label: 'Two-seat' },
       { key: 'three-seat', label: 'Three-seat' },
       { key: 'compact', label: 'Compact' },
       { key: 'wide', label: 'Wide' },
     ],
+    facets: [
+      {
+        code: 'material',
+        label: 'Material',
+        input: 'multiselect',
+        values: ['Oak', 'Walnut', 'Teak', 'Linen', 'Leather', 'Steel', 'Glass', 'Marble'],
+      },
+      {
+        code: 'room',
+        label: 'Room',
+        input: 'select',
+        values: ['Living room', 'Dining room', 'Bedroom', 'Study', 'Outdoor'],
+      },
+    ],
   },
   {
     match: /\b(coffee|tea|food|grocer\w*|spice|snack|bakery|roaster\w*)\b/i,
-    options: [
+    sizeLabel: 'Pack size',
+    sizes: [
       { key: '250g', label: '250 g' },
       { key: '500g', label: '500 g' },
       { key: '1kg', label: '1 kg' },
     ],
+    facets: [
+      {
+        code: 'roast_level',
+        label: 'Roast level',
+        input: 'select',
+        values: ['Light', 'Medium', 'Medium-dark', 'Dark'],
+      },
+      {
+        code: 'origin',
+        label: 'Origin',
+        input: 'select',
+        values: ['Ethiopia', 'Colombia', 'Brazil', 'Guatemala', 'Kenya', 'Sumatra'],
+      },
+      {
+        code: 'grind',
+        label: 'Grind',
+        input: 'multiselect',
+        values: ['Whole bean', 'Espresso', 'Filter', 'French press', 'Moka pot'],
+      },
+    ],
   },
   {
     match: /\b(jewel\w*|ring|watch|accessor\w*)\b/i,
-    options: [
+    sizeLabel: 'Length',
+    sizes: [
       { key: '16cm', label: '16 cm' },
       { key: '18cm', label: '18 cm' },
       { key: '20cm', label: '20 cm' },
     ],
+    facets: [
+      {
+        code: 'material',
+        label: 'Material',
+        input: 'multiselect',
+        values: ['Sterling silver', '18ct gold', 'Rose gold', 'Platinum', 'Brass'],
+      },
+      {
+        code: 'gemstone',
+        label: 'Gemstone',
+        input: 'select',
+        values: ['None', 'Diamond', 'Sapphire', 'Emerald', 'Opal'],
+      },
+    ],
+  },
+  // Apparel, and the fallback for a topic that names nothing else.
+  {
+    sizeLabel: 'Size',
+    sizes: [
+      { key: 'xs', label: 'XS' },
+      { key: 's', label: 'S' },
+      { key: 'm', label: 'M' },
+      { key: 'l', label: 'L' },
+      { key: 'xl', label: 'XL' },
+    ],
+    facets: [
+      {
+        code: 'material',
+        label: 'Material',
+        input: 'multiselect',
+        values: ['Cotton', 'Linen', 'Wool', 'Leather', 'Denim', 'Silk'],
+      },
+      {
+        code: 'style',
+        label: 'Style',
+        input: 'select',
+        values: ['Casual', 'Formal', 'Sport', 'Outdoor'],
+      },
+    ],
   },
 ];
 
-/** Apparel letter sizes, and the fallback for a topic that names nothing else. */
-const APPAREL_SIZES: ReadonlyArray<{ key: string; label: string }> = [
-  { key: 'xs', label: 'XS' },
-  { key: 's', label: 'S' },
-  { key: 'm', label: 'M' },
-  { key: 'l', label: 'L' },
-  { key: 'xl', label: 'XL' },
-];
-
-function sizesFor(
-  topic: string
-): ReadonlyArray<{ key: string; label: string; swatch?: string }> {
-  return SIZE_SCALES.find((scale) => scale.match.test(topic))?.options ?? APPAREL_SIZES;
+function profileFor(topic: string): TopicProfile {
+  // The last entry has no `match` and is the fallback, so this never misses.
+  return TOPIC_PROFILES.find((profile) => !profile.match || profile.match.test(topic))!;
 }
 
 /**
@@ -144,18 +231,6 @@ function weightRangeFor(topic: string): [number, number] {
   if (/\b(jewel\w*|ring|watch|accessor\w*)\b/i.test(topic)) return [0.05, 0.5];
   return [0.2, 3];
 }
-
-/** Non-axis attributes every generated set carries, for layered nav to filter on. */
-const MATERIALS = [
-  'Oak',
-  'Walnut',
-  'Linen',
-  'Cotton',
-  'Leather',
-  'Steel',
-  'Glass',
-  'Wool',
-];
 
 // ---------------------------------------------------------------------------
 // Planning
@@ -227,20 +302,20 @@ function planCategories(request: MagentoContentRequest): {
 
 function planAttributes(request: MagentoContentRequest): MagentoAttribute[] {
   const ratio = request.catalog.configurable_ratio ?? DEFAULT_CONFIGURABLE_RATIO;
+  const profile = profileFor(request.store.topic);
   const attributes: MagentoAttribute[] = [];
 
   if (ratio > 0) {
     const axes = request.catalog.axes ?? [
       { code: 'color', label: 'Colour', swatch: 'visual' as const },
-      { code: 'size', label: 'Size', swatch: 'text' as const },
+      { code: 'size', label: profile.sizeLabel, swatch: 'text' as const },
     ];
 
-    const sizes = sizesFor(request.store.topic);
     for (const axis of axes) {
       const visual = axis.swatch === 'visual';
-      const options: MagentoAttributeOption[] = (
-        axis.code === 'size' ? sizes : COLOURS
-      ).map((option) => ({
+      const source: ReadonlyArray<{ key: string; label: string; swatch?: string }> =
+        axis.code === 'size' ? profile.sizes : COLOURS;
+      const options: MagentoAttributeOption[] = source.map((option) => ({
         key: option.key,
         label: option.label,
         ...(visual && option.swatch ? { swatch: option.swatch } : {}),
@@ -252,24 +327,39 @@ function planAttributes(request: MagentoContentRequest): MagentoAttribute[] {
         // Both are required by Magento for a configurable axis; see the file
         // docblock. Not a default a caller may override.
         global: true,
+        ...FILTERABLE,
         ...(axis.swatch ? { swatch: axis.swatch } : {}),
         options,
       });
     }
   }
 
-  // One multiselect so layered navigation has something to filter on beyond
-  // the axes — Luma's own `material` plays exactly this role.
-  attributes.push({
-    code: 'material',
-    label: 'Material',
-    input: 'multiselect',
-    global: false,
-    options: MATERIALS.map((name) => ({ key: slugify(name), label: name })),
-  });
+  // The non-axis facets this trade filters on, so layered navigation has more
+  // than colour and size in it.
+  for (const facet of profile.facets) {
+    attributes.push({
+      code: facet.code,
+      label: facet.label,
+      input: facet.input,
+      global: false,
+      ...FILTERABLE,
+      options: facet.values.map((name) => ({ key: slugify(name), label: name })),
+    });
+  }
 
   return attributes;
 }
+
+/**
+ * Every generated attribute is filterable. A demo catalog exists to show a
+ * storefront working, and Magento's default of 0 builds no facet at all — the
+ * theme's filter sidebar then renders correctly with nothing in it, which is
+ * the one failure that reads as a broken theme rather than a thin catalog.
+ */
+const FILTERABLE = {
+  is_filterable: 1,
+  is_filterable_in_search: 1,
+} as const satisfies Pick<MagentoAttribute, 'is_filterable' | 'is_filterable_in_search'>;
 
 function planAttributeSets(
   request: MagentoContentRequest,
@@ -304,7 +394,9 @@ function planProducts(
   const axisCodes = attributes
     .filter((a) => a.global && a.input === 'select')
     .map((a) => a.code);
-  const material = attributes.find((a) => a.code === 'material');
+  const facets = attributes.filter(
+    (a) => !axisCodes.includes(a.code) && (a.options?.length ?? 0) > 0
+  );
   const weight = weightRangeFor(request.store.topic);
 
   const skuPrefix = skuStem(request.store.name);
@@ -327,7 +419,7 @@ function planProducts(
         sku: seed.sku ?? uniqueSku(skuPrefix, seed.name, usedSkus),
         axisCodes,
         attributes,
-        material,
+        facets,
         random,
         weight,
         ...(seed.description ? { description: seed.description } : {}),
@@ -356,7 +448,7 @@ function planProducts(
           sku: uniqueSku(skuPrefix, name, usedSkus),
           axisCodes,
           attributes,
-          material,
+          facets,
           random,
           weight,
         })
@@ -382,7 +474,8 @@ interface BuildArgs {
   sku: string;
   axisCodes: string[];
   attributes: MagentoAttribute[];
-  material: MagentoAttribute | undefined;
+  /** The non-axis attributes this product should carry a value for. */
+  facets: MagentoAttribute[];
   random: Random;
   /** Kilogram floor and ceiling for this topic; see weightRangeFor. */
   weight: [number, number];
@@ -404,12 +497,19 @@ function buildProduct(args: BuildArgs): MagentoProduct {
     ...(args.shortDescription ? { short_description: args.shortDescription } : {}),
   };
 
-  if (args.material?.options?.length) {
-    const chosen = pickSome(args.random, args.material.options, 1, 2).map(
-      (option) => option.key
-    );
-    product.attributes = { material: chosen };
+  // Every non-axis facet gets a value, or the attribute exists with nothing
+  // behind it and its filter shows up empty.
+  const values: Record<string, string | string[]> = {};
+  for (const facet of args.facets) {
+    const options = facet.options ?? [];
+    if (options.length === 0) continue;
+    const chosen =
+      facet.input === 'multiselect'
+        ? pickSome(args.random, options, 1, 2).map((option) => option.key)
+        : pickSome(args.random, options, 1, 1)[0]!.key;
+    values[facet.code] = chosen;
   }
+  if (Object.keys(values).length > 0) product.attributes = values;
 
   if (args.type === 'configurable' && args.axisCodes.length > 0) {
     product.axes = args.axisCodes;

@@ -292,8 +292,14 @@ actually stores a storefront, rather than after a blog:
   there are 110 `{{store url}}` directives and one stray `data-content-type`. Absolute URLs are
   rejected: a stock Luma block has `http://localhost:8090/…` baked into it, which is dead on
   every other host.
-- **Sizes and weights chosen for the topic.** A sofa is "Three-seat" and weighs 34 kg; a shirt
-  is "M" and weighs 0.4 kg. Luma keeps three separate size vocabularies for the same reason.
+- **Sizes, weights and facets chosen for the topic.** A sofa is "Three-seat" and weighs 34 kg;
+  a shirt is "M" and weighs 0.4 kg. Luma keeps three separate size vocabularies for the same
+  reason. The non-axis attributes follow the trade too — a roastery filters by Roast level,
+  Origin and Grind, not by Cotton and Leather — and the size axis is labelled "Pack size" there.
+- **Every attribute is filterable** (`is_filterable: 1`, `is_filterable_in_search: 1`) and every
+  product carries a value for every non-axis facet. Magento's own default is `0`, which builds
+  no layered-navigation facet at all: the theme's filter sidebar then renders correctly with
+  only Price in it, which reads as a broken theme rather than a thin catalog.
 
 ThemeSeed never emits what Magento derives: no `url_rewrite` rows, no index tables, no entity
 ids. Everything is addressed by `key`, and the data patch resolves them through Magento's own

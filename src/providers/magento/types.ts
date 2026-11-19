@@ -107,6 +107,16 @@ export interface MagentoAttribute {
    * which is a confusing failure to hit at `setup:upgrade` time.
    */
   global?: boolean;
+  /**
+   * `catalog_eav_attribute.is_filterable`: 0 none, 1 filterable with results,
+   * 2 always filterable. Magento builds no layered-navigation facet at all for
+   * an attribute left at 0, so a generated catalog that omits this renders a
+   * category page whose only filter is Price — the sidebar markup is right and
+   * there is nothing to put in it. Generated attributes default to 1.
+   */
+  is_filterable?: 0 | 1 | 2;
+  /** `catalog_eav_attribute.is_filterable_in_search`, for the search results page. */
+  is_filterable_in_search?: 0 | 1;
   swatch?: 'visual' | 'text';
   options?: MagentoAttributeOption[];
 }

@@ -64,10 +64,12 @@ function offlineAi(): ImageSource {
 
 /** A tiny, distinct PNG per `mem://<hash>` location. */
 async function memoryBytes(ref: ImageRef): Promise<Uint8Array> {
-  const n = Number(ref.location.replace('mem://', ''));
-  return encodePng(48 + (n % 9), 36, (x, y) => ({
-    r: (n + x) % 256,
-    g: (n >> 3) % 256,
+  // Extract a numeric seed from the hash by summing its characters.
+  const hash = ref.location.replace('mem://', '');
+  const seed = Array.from(hash).reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return encodePng(48 + (seed % 9), 36, (x, y) => ({
+    r: (seed + x) % 256,
+    g: (seed >> 3) % 256,
     b: (y * 5) % 256,
   }));
 }
@@ -363,8 +365,23 @@ describe('images and credits', () => {
       imageSource: undefined,
       env: { UNSPLASH_ACCESS_KEY: 'x' },
     });
-    expect(report.written).toEqual(['posts.json']);
-    expect(report.warnings.join('\n')).toMatch(/no usable source/);
+    // Stock is refused for a GPL target, so auto falls back to placeholder art
+    // rather than licensed photography.
+    expect(report.written.some((f) => f.startsWith('content-media/'))).toBe(true);
+    expect(report.warnings.join('\n')).toMatch(/no photo source/);
+  });
+
+  it('falls back to procedural placeholders rather than shipping a demo with no images', async () => {
+    const request = await fixtureRequest();
+    request.images = { source: 'auto' };
+    const report = await run(request, { imageSource: undefined, env: {} });
+
+    // Every item gets a picture: a marketplace demo that imports to grey boxes is the one
+    // screenshot a buyer sees first. Procedural placeholders need no key and are GPL-safe.
+    expect(
+      report.written.filter((f) => f.startsWith('content-media/')).length
+    ).toBeGreaterThan(0);
+    expect(report.warnings.join('\n')).not.toMatch(/no usable source/);
   });
 
   it('allows stock for client targets and credits it with its real licence and URL', async () => {

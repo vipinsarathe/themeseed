@@ -81,6 +81,16 @@
           "default": false,
           "description": "Required true for any attribute used as a configurable axis — Magento refuses a non-global axis."
         },
+        "is_filterable": {
+          "enum": [0, 1, 2],
+          "default": 0,
+          "description": "catalog_eav_attribute.is_filterable: 0 none, 1 filterable with results, 2 always filterable. Magento builds no layered-navigation facet for an attribute left at 0, so a category page shows only Price. Generated attributes are written as 1."
+        },
+        "is_filterable_in_search": {
+          "enum": [0, 1],
+          "default": 0,
+          "description": "catalog_eav_attribute.is_filterable_in_search, for the search results page."
+        },
         "swatch": { "enum": ["visual", "text"] },
         "options": {
           "type": "array",
