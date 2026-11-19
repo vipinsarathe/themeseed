@@ -7,6 +7,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.10.2] — 2026-11-19
+
+- Bring the release script into the repo; document the registry's Basic-auth requirement.
+
 ## [0.10.1] — 2026-11-19
 
 ### Fixed
