@@ -184,6 +184,33 @@ of `npm run test:e2e` against your platform.
 Small, focused PRs get reviewed faster. A provider is a big change but a self-contained one,
 which is fine.
 
+## Releasing
+
+```bash
+export NPM_INDIANIC_TOKEN=<token>   # https://npm.indianic.in/#/dashboard → API Tokens
+scripts/npm_release                 # patch; --minor / --major / -m "changelog line"
+```
+
+It bumps the version, syncs both `.claude-plugin` manifests, runs `npm run verify`, writes the
+CHANGELOG entry under `## [Unreleased]`, commits, tags, publishes and pushes. A failed verify
+reverts the version rather than shipping; a failed publish drops the tag and keeps the commit.
+The working tree must be clean first, so the release says exactly what it ships.
+
+**The registry authenticates with Basic auth, not Bearer.** `npm login` and
+`npm config set //npm.indianic.in/:_authToken …` both write an `_authToken=` line, which this
+registry rejects — `npm whoami` answers `ENEEDAUTH` and `npm publish` answers `E401`, however
+valid the token is. What works is `_auth=base64("token:<TOKEN>")`. The script writes that to a
+throwaway userconfig for the duration of the publish and never touches `~/.npmrc`. To publish by
+hand, set it once:
+
+```bash
+npm config delete //npm.indianic.in/:_authToken --location=user
+npm config set //npm.indianic.in/:_auth "$(printf 'token:<TOKEN>' | base64)" --location=user
+```
+
+`npm whoami` then answers `token` — that is the Basic auth username, not a failure. The real
+identity is in `curl -H "Authorization: Bearer <TOKEN>" https://npm.indianic.in/api/me`.
+
 ## Reporting bugs
 
 Include the platform and CMS version, the `themeseed --version`, the command or MCP tool call,

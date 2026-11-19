@@ -1,0 +1,231 @@
+#!/usr/bin/env bash
+###############################################################################
+# npm_release — cut a release of @indianic/themeseed to the private registry.
+#
+# Bumps the version, syncs the plugin manifests, runs the full verify gate,
+# writes a CHANGELOG entry, commits, tags, pushes and publishes.
+#
+# Usage:
+#   scripts/npm_release                 # patch bump (default)
+#   scripts/npm_release --minor
+#   scripts/npm_release --major
+#   scripts/npm_release -m "message"    # one-line changelog entry
+#   scripts/npm_release -y              # non-interactive
+#
+# Auth:
+#   export NPM_INDIANIC_TOKEN=<token from https://npm.indianic.in/#/dashboard>
+#
+#   The registry authenticates npm clients with **Basic** auth, not Bearer:
+#   `_auth=base64("token:<TOKEN>")`. An `_authToken=` line — what `npm login`
+#   and `npm config set //…:_authToken` write — is rejected with ENEEDAUTH on
+#   whoami and E401 on publish, however valid the token is. That one line is
+#   the whole reason this script exists rather than a bare `npm publish`.
+###############################################################################
+set -euo pipefail
+
+REGISTRY="https://npm.indianic.in"
+
+# The repo root, wherever the script is called from.
+PROJECT_DIR="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+log()  { echo -e "${BLUE}==> $1${NC}"; }
+ok()   { echo -e "${GREEN}  ✓ $1${NC}"; }
+warn() { echo -e "${YELLOW}  ⚠ $1${NC}"; }
+fail() { echo -e "${RED}  ✗ $1${NC}"; exit 1; }
+
+cd "$PROJECT_DIR"
+
+# ─── Arguments ───────────────────────────────────────────────────────────────
+
+BUMP_TYPE="patch"
+CHANGELOG_MSG=""
+AUTO_YES=false
+
+# `shift`-based, so `-m` can read the argument after it. The indirect form
+# ${!i} this replaces is a bash 4 feature; macOS ships bash 3.2, where it
+# aborts the script under `set -u`.
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --patch) BUMP_TYPE="patch" ;;
+        --minor) BUMP_TYPE="minor" ;;
+        --major) BUMP_TYPE="major" ;;
+        --yes|-y) AUTO_YES=true ;;
+        -m)
+            [ $# -ge 2 ] || fail "-m needs a message"
+            CHANGELOG_MSG="$2"
+            shift
+            ;;
+        --help|-h)
+            echo "Usage: scripts/npm_release [--patch|--minor|--major] [-m \"message\"] [-y]"
+            echo ""
+            echo "  --patch   (default) 1.0.0 → 1.0.1"
+            echo "  --minor             1.0.0 → 1.1.0"
+            echo "  --major             1.0.0 → 2.0.0"
+            echo "  -m \"msg\"  One-line changelog entry (default: commits since the last tag)"
+            echo "  -y        Do not prompt"
+            echo ""
+            echo "  Needs NPM_INDIANIC_TOKEN. Create one at ${REGISTRY}/#/dashboard."
+            exit 0
+            ;;
+        *) fail "Unknown argument: $1" ;;
+    esac
+    shift
+done
+
+# ─── Pre-flight ──────────────────────────────────────────────────────────────
+
+echo ""
+echo -e "${BOLD}  themeseed release${NC}"
+echo ""
+
+log "Pre-flight checks..."
+
+TOKEN="${NPM_INDIANIC_TOKEN:-}"
+[ -n "$TOKEN" ] || fail "No auth token. export NPM_INDIANIC_TOKEN=<token> and try again."
+
+PKG_NAME=$(node -p "require('./package.json').name")
+CURRENT_VERSION=$(node -p "require('./package.json').version")
+ok "Package: $PKG_NAME@$CURRENT_VERSION"
+
+WHOAMI=$(curl -s -H "Authorization: Bearer $TOKEN" "$REGISTRY/api/me" 2>/dev/null \
+    | node -e "try{const d=JSON.parse(require('fs').readFileSync(0,'utf8'));console.log(d.user?.username||'unknown')}catch{console.log('unknown')}" 2>/dev/null)
+[ -n "$WHOAMI" ] && [ "$WHOAMI" != "unknown" ] || fail "Auth failed. Check NPM_INDIANIC_TOKEN."
+ok "Authenticated as: $WHOAMI"
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ -n "$(git status --porcelain)" ]; then
+    fail "Working tree is dirty. Commit or stash first — a release should say exactly what it ships."
+fi
+ok "Git working tree clean ($BRANCH)"
+
+# ─── Version ─────────────────────────────────────────────────────────────────
+
+IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+case "$BUMP_TYPE" in
+    patch) PATCH=$((PATCH + 1)) ;;
+    minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+    major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+esac
+NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+echo -e "  ${CYAN}$CURRENT_VERSION${NC} → ${GREEN}$NEW_VERSION${NC}"
+
+if [ "$AUTO_YES" != true ]; then
+    read -r -p "  Release $PKG_NAME@$NEW_VERSION? [y/N] " ANSWER
+    [[ "$ANSWER" =~ ^[Yy]$ ]] || fail "Cancelled"
+fi
+
+# ─── Changelog ───────────────────────────────────────────────────────────────
+
+log "Writing the changelog entry..."
+
+if [ -n "$CHANGELOG_MSG" ]; then
+    CHANGES="- $CHANGELOG_MSG"
+else
+    LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+    if [ -n "$LAST_TAG" ]; then
+        CHANGES=$(git log "$LAST_TAG..HEAD" --pretty=format:"- %s" --no-merges | head -20)
+    else
+        CHANGES=$(git log --pretty=format:"- %s" --no-merges -10)
+    fi
+    [ -z "$CHANGES" ] && CHANGES="- Patch release"
+fi
+
+# Insert directly below `## [Unreleased]`, so Keep a Changelog order holds:
+# newest release first, with Unreleased still above it.
+node - "$NEW_VERSION" "$CHANGES" <<'NODE'
+const fs = require('node:fs');
+const [version, changes] = process.argv.slice(2);
+const date = new Date().toISOString().slice(0, 10);
+const entry = `## [${version}] — ${date}\n\n${changes}\n`;
+const file = 'CHANGELOG.md';
+const text = fs.readFileSync(file, 'utf8');
+const marker = '## [Unreleased]\n';
+if (!text.includes(marker)) throw new Error('CHANGELOG.md has no "## [Unreleased]" heading');
+fs.writeFileSync(file, text.replace(marker, `${marker}\n${entry}`));
+NODE
+ok "CHANGELOG.md updated"
+
+# ─── Version files ───────────────────────────────────────────────────────────
+
+log "Updating package.json and the plugin manifests..."
+npm version "$NEW_VERSION" --no-git-tag-version --allow-same-version > /dev/null
+
+# test/unit/plugin-manifest.test.ts fails if either manifest drifts from
+# package.json, so they move together or the verify gate below catches it.
+node - "$CURRENT_VERSION" "$NEW_VERSION" <<'NODE'
+const fs = require('node:fs');
+const [from, to] = process.argv.slice(2);
+for (const file of ['.claude-plugin/plugin.json', '.claude-plugin/marketplace.json']) {
+  const text = fs.readFileSync(file, 'utf8');
+  fs.writeFileSync(file, text.split(`"version": "${from}"`).join(`"version": "${to}"`));
+}
+NODE
+ok "Version files updated"
+
+# ─── Verify ──────────────────────────────────────────────────────────────────
+
+log "Running the verify gate (typecheck + lint + unit tests)..."
+npm run verify > /tmp/themeseed-release-verify.log 2>&1 || {
+    tail -30 /tmp/themeseed-release-verify.log
+    git checkout -- package.json package-lock.json CHANGELOG.md .claude-plugin
+    fail "verify failed — version reverted to $CURRENT_VERSION"
+}
+ok "verify passed"
+
+# ─── Commit & tag ────────────────────────────────────────────────────────────
+
+log "Committing and tagging..."
+git add -A
+git commit -q -m "chore(release): $NEW_VERSION"
+git tag -a "v$NEW_VERSION" -m "Release $NEW_VERSION"
+ok "Tagged v$NEW_VERSION"
+
+# ─── Publish ─────────────────────────────────────────────────────────────────
+
+log "Publishing $PKG_NAME@$NEW_VERSION to $REGISTRY..."
+
+# A throwaway userconfig rather than a rewrite of ~/.npmrc: a release that is
+# interrupted here must not leave the developer's own npm auth truncated.
+RELEASE_NPMRC=$(mktemp -t themeseed-npmrc)
+chmod 600 "$RELEASE_NPMRC"
+trap 'rm -f "$RELEASE_NPMRC"' EXIT
+{
+    echo "@indianic:registry=${REGISTRY}/"
+    echo "//npm.indianic.in/:_auth=$(printf 'token:%s' "$TOKEN" | base64)"
+} > "$RELEASE_NPMRC"
+
+npm_config_userconfig="$RELEASE_NPMRC" npm publish --registry="$REGISTRY" || {
+    git tag -d "v$NEW_VERSION" > /dev/null
+    fail "Publish failed — tag removed, commit kept. Fix and re-tag."
+}
+ok "Published"
+
+curl -s -X POST "$REGISTRY/api/packages/${PKG_NAME#@}/published" \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{\"version\":\"$NEW_VERSION\"}" > /dev/null 2>&1 || true
+
+# ─── Push ────────────────────────────────────────────────────────────────────
+
+log "Pushing to origin..."
+git push -q origin "$BRANCH" && ok "Pushed $BRANCH" || warn "Push failed — push by hand"
+git push -q origin "v$NEW_VERSION" && ok "Pushed v$NEW_VERSION" || warn "Tag push failed"
+
+# ─── Verify the publish ──────────────────────────────────────────────────────
+
+log "Verifying..."
+PUBLISHED=$(npm view "$PKG_NAME@$NEW_VERSION" version --registry="$REGISTRY" 2>/dev/null || echo "")
+[ "$PUBLISHED" = "$NEW_VERSION" ] && ok "Registry serves $NEW_VERSION" || warn "Could not read $NEW_VERSION back — check manually"
+
+echo ""
+echo -e "${GREEN}  Released: $PKG_NAME@$NEW_VERSION${NC}"
+echo -e "  View: npm view $PKG_NAME --registry=$REGISTRY"
+echo ""
