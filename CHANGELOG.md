@@ -7,6 +7,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.10.1] — 2026-11-19
+
+### Fixed
+
+- **`bin` paths are written the way npm stores them.** `npm publish` auto-corrected
+  `./dist/cli/index.js` to `dist/cli/index.js` on every release, so the published metadata did
+  not match the source. Fixed at the source with `npm pkg fix`.
+
 ## [0.10.0] — 2026-11-19
 
 ### Fixed
